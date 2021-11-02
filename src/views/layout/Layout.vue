@@ -3,7 +3,9 @@
     <Header />
     <Sidebar />
     <div class="main">
-      <router-view class="content"> </router-view>
+      <keep-alive>
+        <router-view class="content"> </router-view>
+      </keep-alive>
     </div>
   </div>
 </template>
