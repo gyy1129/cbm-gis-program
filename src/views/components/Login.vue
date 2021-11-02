@@ -9,7 +9,6 @@
       <el-form-item prop="password" label="密码：">
         <el-input type="password" v-model="loginForm.password" placeholder="密码"></el-input>
       </el-form-item>
-      <!-- <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox> -->
       <el-form-item class="btn">
         <el-button type="primary" @click="submit" class="submit">登录</el-button>
         <el-button @click="register" class="register">注册</el-button>

@@ -1,7 +1,6 @@
 <template>
   <div class="tabs">
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <!-- <el-breadcrumb-item :to="{ path: '/home' }">数据报表</el-breadcrumb-item> -->
       <el-breadcrumb-item>{{ firstMenu }}</el-breadcrumb-item>
       <el-breadcrumb-item>{{ secondMenu }}</el-breadcrumb-item>
     </el-breadcrumb>
@@ -35,9 +34,10 @@ export default {
   position: absolute;
   top: 0px;
   left: 0px;
-  height: 32px;
+  height: 40px;
   width: 100%;
   background-color: #fff;
+  box-shadow: 3px 2px 4px 2px #dcdcdc;
   .el-breadcrumb {
     font-size: 15px;
     font-weight: 600;
@@ -45,6 +45,9 @@ export default {
     display: flex;
     align-items: center;
     margin-left: 22px;
+    /deep/.el-breadcrumb__inner {
+      color: #17889a;
+    }
   }
 }
 </style>

@@ -21,11 +21,6 @@
       </el-submenu>
       <el-submenu index="/function">
         <template slot="title"><i class="el-icon-menu" /><span>功能</span></template>
-        <!-- <el-menu-item-group>
-          <el-menu-item index="/function/cluster">聚类</el-menu-item>
-          <el-menu-item index="/function/draw">构图</el-menu-item>
-          <el-menu-item index="/function/forecast">预测</el-menu-item>
-        </el-menu-item-group> -->
         <el-submenu index="/function/gnn">
           <template slot="title">图神经网络</template>
           <el-menu-item-group>

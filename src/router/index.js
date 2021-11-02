@@ -31,9 +31,8 @@ const routes = [
         name: 'cbmproperty',
         component: () => import('@/views/contents/datas/cbmProperty.vue'),
         meta: {
-          label: '煤层气属性数据', // 标题
-          cache: true, // 是否缓存
-          role: '/cbmproperty'
+          title: '煤层气属性数据', // 标题
+          cache: true
         }
       },
       {
@@ -42,8 +41,7 @@ const routes = [
         component: () => import('@/views/contents/datas/cbmGas.vue'),
         meta: {
           label: '煤层气产气时间序列', // 标题
-          cache: true, // 是否缓存
-          role: '/cbmgas'
+          cache: true
         }
       },
       {
@@ -52,8 +50,7 @@ const routes = [
         component: () => import('@/views/contents/datas/cbmWater.vue'),
         meta: {
           label: '煤层气产水时间序列', // 标题
-          cache: true, // 是否缓存
-          role: '/cbmwater'
+          cache: true
         }
       },
       {
@@ -62,8 +59,7 @@ const routes = [
         component: () => import('@/views/contents/datas/gisData.vue'),
         meta: {
           label: '煤层气gis数据',
-          cache: true,
-          role: '/gisdata'
+          cache: true
         }
       },
       {
@@ -72,8 +68,7 @@ const routes = [
         component: () => import('@/views/contents/functions/cluster.vue'),
         meta: {
           label: '聚类',
-          cache: true,
-          role: '/cluster'
+          cache: true
         }
       },
       {
@@ -82,8 +77,7 @@ const routes = [
         component: () => import('@/views/contents/functions/draw.vue'),
         meta: {
           label: '构图',
-          cache: true,
-          role: '/draw'
+          cache: true
         }
       },
       {
@@ -92,8 +86,7 @@ const routes = [
         component: () => import('@/views/contents/functions/forecast.vue'),
         meta: {
           label: '预测',
-          cache: true,
-          role: '/forecast'
+          cache: true
         }
       }
     ]
