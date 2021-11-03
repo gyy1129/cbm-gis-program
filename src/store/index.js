@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-export const store = new Vuex.Store({
+const store = new Vuex.Store({
   // 设置属性
   state: {
     isLogin: false
@@ -28,3 +28,5 @@ export const store = new Vuex.Store({
   },
   modules: {}
 })
+
+export default store
