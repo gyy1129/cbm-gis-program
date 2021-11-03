@@ -12,19 +12,19 @@ const routes = [
     path: '/login',
     name: 'login',
     component: () => import('@/views/components/Login.vue'),
-    meta: { title: '登录' }
+    meta: { title: '登录', isLogin: false }
   },
   {
     path: '/register',
     name: 'register',
     component: () => import('@/views/components/Register.vue'),
-    meta: { title: '注册' }
+    meta: { title: '注册', isLogin: false }
   },
   {
     path: '/home',
     name: 'home',
     component: () => import('@/views/common/Home.vue'),
-    meta: { title: '煤层气管理项目' },
+    meta: { title: '煤层气管理项目', isLogin: true },
     children: [
       {
         path: '/data/cbmproperty',
