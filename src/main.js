@@ -4,10 +4,12 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import VueParticles from 'vue-particles'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+Vue.use(VueParticles)
 router.beforeEach((to, from, next) => {
   //获取用户登录成功后储存的登录标志
   let getFlag = localStorage.getItem('Flag')
