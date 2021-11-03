@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 // 解决Vue-Router升级导致的Uncaught(in promise) navigation guard问题
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location, onResolve, onReject) {
-  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
-  return originalPush.call(this, location).catch(err => err)
-}
+// const originalPush = VueRouter.prototype.push
+// VueRouter.prototype.push = function push(location, onResolve, onReject) {
+//   if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+//   return originalPush.call(this, location).catch(err => err)
+// }
 Vue.use(VueRouter)
 
 const routes = [
@@ -37,7 +37,7 @@ const routes = [
         component: () => import('@/views/contents/datas/cbmProperty.vue'),
         meta: {
           title: '煤层气属性数据', // 标题
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -46,7 +46,7 @@ const routes = [
         component: () => import('@/views/contents/datas/cbmGas.vue'),
         meta: {
           label: '煤层气产气时间序列', // 标题
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -55,7 +55,7 @@ const routes = [
         component: () => import('@/views/contents/datas/cbmWater.vue'),
         meta: {
           label: '煤层气产水时间序列', // 标题
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -64,7 +64,7 @@ const routes = [
         component: () => import('@/views/contents/datas/gisData.vue'),
         meta: {
           label: '煤层气gis数据',
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -73,7 +73,7 @@ const routes = [
         component: () => import('@/views/contents/functions/cluster.vue'),
         meta: {
           label: '聚类',
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -82,7 +82,7 @@ const routes = [
         component: () => import('@/views/contents/functions/draw.vue'),
         meta: {
           label: '构图',
-          cache: true
+          isLogin: true
         }
       },
       {
@@ -91,7 +91,7 @@ const routes = [
         component: () => import('@/views/contents/functions/forecast.vue'),
         meta: {
           label: '预测',
-          cache: true
+          isLogin: true
         }
       }
     ]
