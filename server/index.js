@@ -9,12 +9,12 @@ app.use(express.json())
 
 app.post('/login', api.login)
 app.post('/register', api.register)
+app.post('/data/cbmproperty', api.cbmProperty)
 
-
-app.listen(3000,(err) => {
-  if(!err){
-    console.log("project running on port 3000...")
-  }else{
+app.listen(3000, err => {
+  if (!err) {
+    console.log('project running on port 3000...')
+  } else {
     console.log(err)
   }
 })

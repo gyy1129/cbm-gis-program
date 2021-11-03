@@ -13,28 +13,28 @@
           style="width: 100%"
           :header-cell-style="{ color: '#fff', fontWeight: 'bold', backgroundColor: '#7896b0', textAlign: 'center' }"
         >
-          <el-table-column prop="date" label="井名" width="120" fixed> </el-table-column>
-          <el-table-column prop="name" label="井型"> </el-table-column>
-          <el-table-column prop="address" label="井底坐标X" width="120"> </el-table-column>
-          <el-table-column prop="date" label="井底坐标Y" width="120"> </el-table-column>
-          <el-table-column prop="name" label="渗透率"> </el-table-column>
-          <el-table-column prop="address" label="孔隙度（%）" width="120"> </el-table-column>
-          <el-table-column prop="date" label="粘土（%）" width="120"> </el-table-column>
-          <el-table-column prop="name" label="挥发分（%）" width="120"> </el-table-column>
-          <el-table-column prop="address" label="煤埋深"> </el-table-column>
-          <el-table-column prop="date" label="含气量"> </el-table-column>
-          <el-table-column prop="name" label="含气饱和度（%）" width="140"> </el-table-column>
-          <el-table-column prop="address" label="顶板砂岩厚度" width="140"> </el-table-column>
-          <el-table-column prop="date" label="底板砂岩厚度" width="140"> </el-table-column>
-          <el-table-column prop="name" label="煤层厚度"> </el-table-column>
-          <el-table-column prop="address" label="灰分（%）" width="120"> </el-table-column>
-          <el-table-column prop="address" label="总压裂液量" width="120"> </el-table-column>
-          <el-table-column prop="date" label="停泵压力"> </el-table-column>
-          <el-table-column prop="name" label="加砂量"> </el-table-column>
-          <el-table-column prop="address" label="储层压力"> </el-table-column>
-          <el-table-column prop="date" label="解吸压力"> </el-table-column>
-          <el-table-column prop="name" label="降液速度"> </el-table-column>
-          <el-table-column prop="address" label="排采天数"> </el-table-column>
+          <el-table-column prop="well_name" label="井名" width="100" fixed> </el-table-column>
+          <el-table-column prop="well_type" label="井型"> </el-table-column>
+          <el-table-column prop="coordinate_x" label="井底坐标X" width="120"> </el-table-column>
+          <el-table-column prop="coordinate_y" label="井底坐标Y" width="120"> </el-table-column>
+          <el-table-column prop="permeability" label="渗透率" width="120"> </el-table-column>
+          <el-table-column prop="porosity" label="孔隙度（%）" width="120"> </el-table-column>
+          <el-table-column prop="clay" label="粘土（%）" width="120"> </el-table-column>
+          <el-table-column prop="volatiles" label="挥发分（%）" width="120"> </el-table-column>
+          <el-table-column prop="burial_depth" label="煤埋深"> </el-table-column>
+          <el-table-column prop="gas_content" label="含气量"> </el-table-column>
+          <el-table-column prop="gas_saturation" label="含气饱和度（%）" width="140"> </el-table-column>
+          <el-table-column prop="roof_sandstone" label="顶板砂岩厚度" width="120"> </el-table-column>
+          <el-table-column prop="floor_sandstone" label="底板砂岩厚度" width="120"> </el-table-column>
+          <el-table-column prop="coal_thickness" label="煤层厚度"> </el-table-column>
+          <el-table-column prop="ash" label="灰分（%）" width="120"> </el-table-column>
+          <el-table-column prop="total_fracturing" label="总压裂液量" width="120"> </el-table-column>
+          <el-table-column prop="stop_pump_pressure" label="停泵压力"> </el-table-column>
+          <el-table-column prop="sand" label="加砂量"> </el-table-column>
+          <el-table-column prop="reservoir_pressure" label="储层压力"> </el-table-column>
+          <el-table-column prop="desorption_pressure" label="解吸压力"> </el-table-column>
+          <el-table-column prop="namdrop_speede" label="降液速度"> </el-table-column>
+          <el-table-column prop="production_days" label="排采天数"> </el-table-column>
         </el-table>
         <el-pagination
           @size-change="handleSizeChange"
@@ -42,7 +42,7 @@
           :current-page.sync="currentPage1"
           :page-size="100"
           layout="total, prev, pager, next"
-          :total="1000"
+          :total="total"
         >
         </el-pagination>
       </el-card>
@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 export default {
   name: 'cbmProperty',
@@ -60,78 +61,8 @@ export default {
       firstMenu: '数据报表',
       secondMenu: '煤层气属性数据',
       currentPage1: 1,
-      tableData: [
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }
-      ]
+      tableData: [],
+      total: null
     }
   },
   computed: {},
@@ -146,7 +77,21 @@ export default {
       console.log(`当前页: ${val}`)
     }
   },
-  mounted() {}
+  mounted() {
+    axios
+      .post('http://localhost:3000/data/cbmproperty')
+      .then(res => {
+        if (res.data.status) {
+          this.tableData = res.data.results
+          this.total = res.data.resultsCount
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
+      .catch(err => {
+        this.$message.error(err.message)
+      })
+  }
 }
 </script>
 <style lang="less" scoped>
