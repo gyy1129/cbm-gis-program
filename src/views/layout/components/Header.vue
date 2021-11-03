@@ -36,6 +36,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          localStorage.removeItem('Flag')
           this.$router.push('/login')
         })
         .catch(() => {
