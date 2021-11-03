@@ -4,11 +4,12 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import VueParticles from 'vue-particles'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
-
+Vue.use(VueParticles)
 router.beforeEach((to, from, next) => {
   //获取用户登录成功后储存的登录标志
   let getFlag = localStorage.getItem('Flag')
@@ -19,7 +20,7 @@ router.beforeEach((to, from, next) => {
     next()
     //如果已登录，还想想进入登录注册界面，则定向回首页
     if (!to.meta.isLogin) {
-      this.$message.error('请先退出登录')
+      ElementUI.Message.error('请先退出登录')
       next({
         path: '/home'
       })
@@ -31,8 +32,8 @@ router.beforeEach((to, from, next) => {
       next({
         path: '/login'
       })
-      //iViewUi友好提示
-      this.$message.info('请先登录')
+      //ElementUI友好提示
+      ElementUI.Message.info('请先登录')
       //用户进入无需登录的界面，则跳转继续
     } else {
       next()

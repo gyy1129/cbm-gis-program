@@ -37,6 +37,7 @@
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
     "prettier": "^2.2.1",
+    "vue-particles": "^1.0.9",
     "vue-template-compiler": "^2.6.11"
   }
 }
