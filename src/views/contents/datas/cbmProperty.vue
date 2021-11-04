@@ -8,54 +8,34 @@
           ref="tableRef"
           stripe
           border
-          height="670"
+          height="600"
           :data="frontEndPageChange"
           style="width: 100%"
           :header-cell-style="{ color: '#fff', fontWeight: 'bold', backgroundColor: '#7896b0', textAlign: 'center' }"
         >
           <el-table-column type="index" width="50" label="序号" fixed></el-table-column>
           <el-table-column prop="well_name" label="井名" width="100" fixed show-overflow-tooltip></el-table-column>
-          <el-table-column prop="well_type" label="井型" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="coordinate_x" label="井底坐标X" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="coordinate_y" label="井底坐标Y" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="permeability" label="渗透率" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="porosity" label="孔隙度（%）" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="clay" label="粘土（%）" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="volatiles" label="挥发分（%）" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="burial_depth" label="煤埋深" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="gas_content" label="含气量" show-overflow-tooltip></el-table-column>
-          <el-table-column
-            prop="gas_saturation"
-            label="含气饱和度（%）"
-            width="140"
-            show-overflow-tooltip
-          ></el-table-column>
-          <el-table-column
-            prop="roof_sandstone"
-            label="顶板砂岩厚度"
-            width="120"
-            show-overflow-tooltip
-          ></el-table-column>
-          <el-table-column
-            prop="floor_sandstone"
-            label="底板砂岩厚度"
-            width="120"
-            show-overflow-tooltip
-          ></el-table-column>
-          <el-table-column prop="coal_thickness" label="煤层厚度" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="ash" label="灰分（%）" width="120" show-overflow-tooltip></el-table-column>
-          <el-table-column
-            prop="total_fracturing"
-            label="总压裂液量"
-            width="120"
-            show-overflow-tooltip
-          ></el-table-column>
-          <el-table-column prop="stop_pump_pressure" label="停泵压力" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="sand" label="加砂量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="reservoir_pressure" label="储层压力" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="desorption_pressure" label="解吸压力" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="namdrop_speede" label="降液速度" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="production_days" label="排采天数" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="well_type" label="井型"></el-table-column>
+          <el-table-column prop="coordinate_x" label="井底坐标X" width="120"></el-table-column>
+          <el-table-column prop="coordinate_y" label="井底坐标Y" width="120"></el-table-column>
+          <el-table-column prop="permeability" label="渗透率" width="120"></el-table-column>
+          <el-table-column prop="porosity" label="孔隙度（%）" width="120"></el-table-column>
+          <el-table-column prop="clay" label="粘土（%）" width="120"></el-table-column>
+          <el-table-column prop="volatiles" label="挥发分（%）" width="120"></el-table-column>
+          <el-table-column prop="burial_depth" label="煤埋深"></el-table-column>
+          <el-table-column prop="gas_content" label="含气量"></el-table-column>
+          <el-table-column prop="gas_saturation" label="含气饱和度（%）" width="140"></el-table-column>
+          <el-table-column prop="roof_sandstone" label="顶板砂岩厚度" width="120"></el-table-column>
+          <el-table-column prop="floor_sandstone" label="底板砂岩厚度" width="120"></el-table-column>
+          <el-table-column prop="coal_thickness" label="煤层厚度"></el-table-column>
+          <el-table-column prop="ash" label="灰分（%）" width="120"></el-table-column>
+          <el-table-column prop="total_fracturing" label="总压裂液量" width="120"></el-table-column>
+          <el-table-column prop="stop_pump_pressure" label="停泵压力"></el-table-column>
+          <el-table-column prop="sand" label="加砂量"></el-table-column>
+          <el-table-column prop="reservoir_pressure" label="储层压力"></el-table-column>
+          <el-table-column prop="desorption_pressure" label="解吸压力"></el-table-column>
+          <el-table-column prop="drop_speed" label="降液速度"></el-table-column>
+          <el-table-column prop="production_days" label="排采天数"></el-table-column>
         </el-table>
         <el-pagination
           @size-change="handleSizeChange"
@@ -88,8 +68,8 @@ export default {
       total: null,
       paginationOptions: {
         currentPage: 1, // 当前页
-        pageSize: 10, // 展示页数
-        pageSizes: [10, 20, 30, 40] // 可选择展示页数 数组
+        pageSize: 20, // 展示页数
+        pageSizes: [20, 30, 40, 50] // 可选择展示页数 数组
       }
     }
   },
@@ -105,7 +85,8 @@ export default {
   },
   methods: {
     onExport() {
-      console.log('导出')
+      const url = 'http://localhost:3000/download/exportpro'
+      window.location = url //这里不能使用get方法跳转，否则下载不成功
     },
     handleSizeChange(val) {
       this.paginationOptions.pageSize = val

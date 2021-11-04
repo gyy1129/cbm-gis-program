@@ -10,6 +10,7 @@ app.use(express.json())
 app.post('/login', api.login)
 app.post('/register', api.register)
 app.post('/data/cbmproperty', api.cbmProperty)
+app.get('/download/exportpro', api.exportpro)
 
 app.listen(3000, err => {
   if (!err) {
