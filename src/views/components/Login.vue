@@ -53,8 +53,9 @@ export default {
                 //我们设置一个名为Flag，值为isLogin的字段，作用是如果Flag有值且为isLogin的时候，证明用户已经登录了。
                 localStorage.setItem('Flag', 'isLogin')
                 this.$message.success(res.data.message)
-                this.userId = res.data.results.id
-                this.username = res.data.results.username
+
+                const { userId, username } = res.data.results
+                localStorage.setItem('UserInfo', JSON.stringify({ id: userId, username: username }))
                 this.$router.push({ path: '/home' })
               } else {
                 this.$message.error(res.data.message)
