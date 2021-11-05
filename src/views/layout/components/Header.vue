@@ -5,7 +5,7 @@
     </div>
     <div class="header_right">
       <div class="right_content">
-        <div class="content_name">{{ username }}</div>
+        <div class="content_name">{{ userInfo.username }}</div>
         <div class="content_signout" @click="signout">退出</div>
       </div>
     </div>
@@ -22,8 +22,10 @@ export default {
   data() {
     return {
       curDate: '',
-      username: '',
-      id: 1
+      userInfo: {
+        username: '',
+        id: 1
+      }
     }
   },
   computed: {},
@@ -39,6 +41,7 @@ export default {
       })
         .then(() => {
           localStorage.removeItem('Flag')
+          localStorage.removeItem('UserInfo')
           this.$router.push('/login')
         })
         .catch(() => {
@@ -51,7 +54,7 @@ export default {
         .post('http://localhost:3000/getUserInfo', params)
         .then(res => {
           if (res.data.status) {
-            this.username = res.data.username
+            this.userInfo.username = res.data.username
           }
         })
         .catch(err => {
@@ -60,8 +63,11 @@ export default {
     }
   },
   mounted() {
+    this.userInfo = JSON.parse(localStorage.getItem('UserInfo'))
     this.getCurDate()
-    this.getUserInfo()
+    if (this.userInfo.id) {
+      this.getUserInfo()
+    }
   }
 }
 </script>
