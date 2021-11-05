@@ -49,7 +49,7 @@ export default {
         })
     },
     getUserInfo() {
-      const params = { id: this.id }
+      const params = { id: this.userInfo.id }
       axios
         .post('http://localhost:3000/getUserInfo', params)
         .then(res => {
