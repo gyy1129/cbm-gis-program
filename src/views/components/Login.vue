@@ -54,8 +54,8 @@ export default {
                 localStorage.setItem('Flag', 'isLogin')
                 this.$message.success(res.data.message)
 
-                const { id, name } = res.data.results
-                localStorage.setItem('UserInfo', JSON.stringify({ id: id, username: name }))
+                const { id, username } = res.data.results
+                localStorage.setItem('UserInfo', JSON.stringify({ id: id, username: username }))
                 this.$router.push({ path: '/home' })
               } else {
                 this.$message.error(res.data.message)

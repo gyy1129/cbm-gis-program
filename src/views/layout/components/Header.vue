@@ -75,7 +75,7 @@ export default {
 .header {
   width: 100%;
   height: 32px;
-  background-color: #1067b8;
+  background-color: #5896a0;
   color: #fff;
   display: flex;
   align-items: center;
