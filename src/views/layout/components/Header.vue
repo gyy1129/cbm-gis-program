@@ -24,7 +24,7 @@ export default {
       curDate: '',
       userInfo: {
         username: '',
-        id: 1
+        id: ''
       }
     }
   },
