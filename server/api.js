@@ -7,7 +7,9 @@ const login = async (request, response) => {
     let values = [request.body.username, request.body.password]
     let res = await pool.query(q, values)
     if (res.rowCount !== 0) {
-      response.status(200).json({ status: true, message: '登录成功！' })
+      response
+        .status(200)
+        .json({ status: true, message: '登录成功！', results: { id: res.rows[0].id, username: res.rows[0].name } })
     } else {
       response.status(200).json({ status: false, message: '用户名或者密码出错！' })
     }
@@ -27,6 +29,17 @@ const register = async (request, response) => {
     }
     await pool.query(q2, [request.body.username, request.body.password])
     response.status(200).json({ status: true, message: '注册成功！' })
+  } catch (err) {
+    console.log(err.stack)
+  }
+}
+
+const getUserInfo = async (request, response) => {
+  const q = `SELECT * FROM userinfo WHERE id = $1`
+  try {
+    let values = [request.body.id]
+    let res = await pool.query(q, values)
+    response.status(200).json({ status: true, username: res.rows[0].name })
   } catch (err) {
     console.log(err.stack)
   }
@@ -135,6 +148,7 @@ const exportpro = async (request, response) => {
 module.exports = {
   login,
   register,
+  getUserInfo,
   cbmProperty,
   exportpro
 }

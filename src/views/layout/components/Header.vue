@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/zh-cn'
 export default {
@@ -21,7 +22,8 @@ export default {
   data() {
     return {
       curDate: '',
-      username: 'gyy'
+      username: '',
+      id: 1
     }
   },
   computed: {},
@@ -42,10 +44,24 @@ export default {
         .catch(() => {
           this.$message.info('已取消退出')
         })
+    },
+    getUserInfo() {
+      const params = { id: this.id }
+      axios
+        .post('http://localhost:3000/getUserInfo', params)
+        .then(res => {
+          if (res.data.status) {
+            this.username = res.data.username
+          }
+        })
+        .catch(err => {
+          this.$message.error(err.message)
+        })
     }
   },
   mounted() {
     this.getCurDate()
+    this.getUserInfo()
   }
 }
 </script>

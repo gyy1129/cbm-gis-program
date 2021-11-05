@@ -31,7 +31,8 @@ export default {
         username: [{ required: true, message: '请输入你的用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入你的密码', trigger: 'blur' }]
       },
-      checked: false
+      userId: null,
+      username: null
     }
   },
   methods: {
@@ -52,6 +53,8 @@ export default {
                 //我们设置一个名为Flag，值为isLogin的字段，作用是如果Flag有值且为isLogin的时候，证明用户已经登录了。
                 localStorage.setItem('Flag', 'isLogin')
                 this.$message.success(res.data.message)
+                this.userId = res.data.results.id
+                this.username = res.data.results.username
                 this.$router.push({ path: '/home' })
               } else {
                 this.$message.error(res.data.message)
