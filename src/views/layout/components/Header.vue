@@ -63,7 +63,7 @@ export default {
     }
   },
   mounted() {
-    this.userInfo = JSON.parse(localStorage.getItem('UserInfo'))
+    this.userInfo = JSON.parse(localStorage.getItem('UserInfo')) || {}
     this.getCurDate()
     if (this.userInfo.id) {
       this.getUserInfo()

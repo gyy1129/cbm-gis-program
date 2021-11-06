@@ -2,12 +2,14 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import tableHeight from './directive/index'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import VueParticles from 'vue-particles'
 
 Vue.config.productionTip = false
-
+// 表格自适应指令
+Vue.use(tableHeight)
 Vue.use(ElementUI)
 Vue.use(VueParticles)
 router.beforeEach((to, from, next) => {
