@@ -61,6 +61,7 @@
 <script>
 import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
+import { EXPORT_ALL } from '@/utils/index'
 export default {
   name: 'cbmProperty',
   components: { Tabs },
@@ -75,7 +76,31 @@ export default {
         currentPage: 1, // 当前页
         pageSize: 20, // 展示页数
         pageSizes: [20, 30, 40, 50] // 可选择展示页数 数组
-      }
+      },
+      tableTitleData: [
+        { label: '井名', prop: 'well_name', width: '100' },
+        { label: '井型', prop: 'well_type', width: '100' },
+        { label: '井底坐标X', prop: 'coordinate_x', width: '120' },
+        { label: '井底坐标Y', prop: 'coordinate_y', width: '120' },
+        { label: '渗透率', prop: 'permeability', width: '120' },
+        { label: '孔隙度（%）', prop: 'porosity', width: '120' },
+        { label: '粘土（%）', prop: 'clay', width: '120' },
+        { label: '挥发分（%）', prop: 'volatiles', width: '120' },
+        { label: '煤埋深', prop: 'burial_depth', width: '100' },
+        { label: '含气量', prop: 'gas_content', width: '100' },
+        { label: '含气饱和度（%）', prop: 'gas_saturation', width: '100' },
+        { label: '顶板砂岩厚度', prop: 'roof_sandstone', width: '100' },
+        { label: '底板砂岩厚度', prop: 'floor_sandstone', width: '100' },
+        { label: '煤层厚度', prop: 'coal_thickness', width: '100' },
+        { label: '灰分（%）', prop: 'ash', width: '100' },
+        { label: '总压裂液量', prop: 'total_fracturing', width: '120' },
+        { label: '停泵压力', prop: 'stop_pump_pressure', width: '120' },
+        { label: '加砂量', prop: 'sand', width: '100' },
+        { label: '储层压力', prop: 'reservoir_pressure', width: '100' },
+        { label: '解吸压力', prop: 'desorption_pressure', width: '120' },
+        { label: '降液速度', prop: 'drop_speed', width: '120' },
+        { label: '排采天数', prop: 'production_days', width: '120' }
+      ]
     }
   },
   computed: {
@@ -93,8 +118,14 @@ export default {
   },
   methods: {
     onExport() {
-      const url = 'http://localhost:3000/download/exportpro'
-      window.location = url //这里不能使用get方法跳转，否则下载不成功
+      /**
+       * @tableTitleData 表头数据
+       * @tableData 表格数据
+       * @第三个 导出excel名称
+       */
+      EXPORT_ALL(this.tableTitleData, this.tableData, '煤气层属性数据')
+      // const url = 'http://localhost:3000/download/exportpro'
+      // window.location = url //这里不能使用get方法跳转，否则下载不成功
     },
     handleSizeChange(val) {
       this.paginationOptions.pageSize = val
