@@ -70,7 +70,7 @@ export default {
       firstMenu: '数据报表',
       secondMenu: '煤层气属性数据',
       currentPage1: 1,
-      tableData: [{ well_name: '2222' }],
+      tableData: [],
       total: null,
       paginationOptions: {
         currentPage: 1, // 当前页
