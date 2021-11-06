@@ -4,13 +4,18 @@
     <div class="containter_main">
       <el-card class="box-card">
         <el-button type="primary" size="medium" @click="onExport" class="btn">导出</el-button>
+        <!-- 
+          设置一下height, 高度随意设置 height="100px"
+          v-tableHeight 指令设置偏移量 v-tableHeight="{ bottomOffset: 60 }"
+         -->
         <el-table
           ref="tableRef"
           stripe
           border
-          height="600"
           :data="frontEndPageChange"
           style="width: 100%"
+          height="100px"
+          v-tableHeight="{ bottomOffset: 60 }"
           :header-cell-style="{ color: '#fff', fontWeight: 'bold', backgroundColor: '#7896b0', textAlign: 'center' }"
         >
           <el-table-column type="index" width="50" label="序号" fixed></el-table-column>
@@ -83,6 +88,9 @@ export default {
       return this.tableData.slice(start, end)
     }
   },
+  mounted() {
+    this.getList()
+  },
   methods: {
     onExport() {
       const url = 'http://localhost:3000/download/exportpro'
@@ -109,9 +117,6 @@ export default {
           this.$message.error(err.message)
         })
     }
-  },
-  mounted() {
-    this.getList()
   }
 }
 </script>
