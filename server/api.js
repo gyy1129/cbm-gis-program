@@ -1,6 +1,6 @@
-const nodeExcel = require('excel-export')
 const pool = require('./db.js')
 
+// 登录
 const login = async (request, response) => {
   const q = `SELECT * FROM userinfo WHERE name = $1 AND password = $2`
   try {
@@ -18,6 +18,7 @@ const login = async (request, response) => {
   }
 }
 
+// 注册
 const register = async (request, response) => {
   const q1 = `SELECT * FROM userinfo WHERE name = $1`
   const q2 = `INSERT INTO userinfo (name, password) VALUES($1,$2) `
@@ -34,6 +35,7 @@ const register = async (request, response) => {
   }
 }
 
+// 获取用户信息
 const getUserInfo = async (request, response) => {
   const q = `SELECT * FROM userinfo WHERE id = $1`
   try {
@@ -45,8 +47,24 @@ const getUserInfo = async (request, response) => {
   }
 }
 
+//  获取煤层气属性数据
 const cbmProperty = async (request, response) => {
   const q = `SELECT * FROM cbmproperty`
+  try {
+    let res = await pool.query(q)
+    if (res.rowCount !== 0) {
+      response.status(200).json({ status: true, results: res.rows, resultsCount: res.rowCount })
+    } else {
+      response.status(200).json({ status: false, message: '暂无数据', results: res.rows })
+    }
+  } catch (err) {
+    console.log(err.stack)
+  }
+}
+
+//  获取煤层气属性数据
+const cbmGas = async (request, response) => {
+  const q = `SELECT * FROM cbmgas`
   try {
     let res = await pool.query(q)
     if (res.rowCount !== 0) {
@@ -63,6 +81,7 @@ module.exports = {
   login,
   register,
   getUserInfo,
-  cbmProperty
+  cbmProperty,
+  cbmGas
   // exportpro
 }
