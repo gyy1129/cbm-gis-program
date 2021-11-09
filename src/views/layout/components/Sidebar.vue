@@ -16,7 +16,7 @@
           <el-menu-item index="/data/cbmproperty">煤层气属性数据</el-menu-item>
           <el-menu-item index="/data/cbmgas">煤层气产气时间序列</el-menu-item>
           <el-menu-item index="/data/cbmwater">煤层气产水时间序列</el-menu-item>
-          <el-menu-item index="/data/gisdata">煤层气gis数据</el-menu-item>
+          <el-menu-item index="/data/gisdata">煤层气井地理位置</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/function">

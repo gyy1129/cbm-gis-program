@@ -123,7 +123,7 @@ export default {
        * @tableData 表格数据
        * @第三个 导出excel名称
        */
-      EXPORT_ALL(this.tableTitleData, this.tableData, '煤气层属性数据')
+      EXPORT_ALL(this.tableTitleData, this.tableData, '煤层气属性数据')
       // const url = 'http://localhost:3000/download/exportpro'
       // window.location = url //这里不能使用get方法跳转，否则下载不成功
     },

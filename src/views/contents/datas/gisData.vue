@@ -12,7 +12,7 @@ export default {
   data() {
     return {
       firstMenu: '数据报表',
-      secondMenu: '煤层气gis数据'
+      secondMenu: '煤层气井地理位置'
     }
   },
   computed: {},

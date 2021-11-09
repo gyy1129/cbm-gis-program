@@ -11,7 +11,7 @@ app.post('/login', api.login)
 app.post('/register', api.register)
 app.post('/getUserInfo', api.getUserInfo)
 app.post('/data/cbmproperty', api.cbmProperty)
-app.get('/download/exportpro', api.exportpro)
+// app.get('/download/exportpro', api.exportpro)
 
 app.listen(3000, err => {
   if (!err) {

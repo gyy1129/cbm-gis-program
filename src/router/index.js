@@ -63,7 +63,7 @@ const routes = [
         name: 'gisdata',
         component: () => import('@/views/contents/datas/gisData.vue'),
         meta: {
-          label: '煤层气gis数据',
+          label: '煤层气井地理位置',
           isLogin: true
         }
       },
