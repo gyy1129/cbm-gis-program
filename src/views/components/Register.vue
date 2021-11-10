@@ -1,6 +1,7 @@
 <!--  -->
 <template>
   <div class="content">
+    <Background />
     <el-form
       :model="registerForm"
       :rules="rules"
@@ -29,9 +30,10 @@
 
 <script>
 import axios from 'axios'
+import Background from './background.vue'
 export default {
   name: 'Register',
-  components: {},
+  components: { Background },
   data() {
     return {
       registerForm: {

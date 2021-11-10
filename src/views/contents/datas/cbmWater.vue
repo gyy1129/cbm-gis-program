@@ -1,7 +1,9 @@
 <template>
   <div class="containter">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">123</div>
+    <div class="containter_main">
+      <baidu-map class="map" center="太原" :zoom="15" :scroll-wheel-zoom="true"> </baidu-map>
+    </div>
   </div>
 </template>
 
@@ -24,6 +26,15 @@ export default {
 <style lang="less" scoped>
 .containter_main {
   position: absolute;
-  top: 32px;
+  top: 60px;
+  left: 18px;
+  width: 87%;
+  height: 820px;
+  border: 3px solid #fff;
+  box-shadow: 0 0 25px #a1a1a1;
+  .map {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

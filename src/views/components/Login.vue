@@ -1,6 +1,7 @@
 <!--  -->
 <template>
   <div class="content">
+    <Background />
     <el-form :model="loginForm" :rules="rules" status-icon ref="loginForm" label-width="80px" class="loginForm">
       <h3 class="title">煤层气管理系统登录</h3>
       <el-form-item prop="username" label="用户名：">
@@ -19,8 +20,10 @@
 
 <script>
 import axios from 'axios'
+import Background from './background.vue'
 export default {
   name: 'Login',
+  components: { Background },
   data() {
     return {
       loginForm: {

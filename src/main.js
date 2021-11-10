@@ -6,12 +6,15 @@ import tableHeight from './directive/index'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import VueParticles from 'vue-particles'
+import BaiduMap from 'vue-baidu-map'
 
 Vue.config.productionTip = false
 // 表格自适应指令
 Vue.use(tableHeight)
 Vue.use(ElementUI)
 Vue.use(VueParticles)
+Vue.use(BaiduMap, { ak: 'oBNh8PCBulUl1upwiNY5NIADxm39FFof' })
+
 router.beforeEach((to, from, next) => {
   //获取用户登录成功后储存的登录标志
   let getFlag = localStorage.getItem('Flag')
