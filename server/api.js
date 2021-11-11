@@ -35,7 +35,7 @@ const register = async (request, response) => {
   }
 }
 
-// 获取用户信息
+// 获取 用户信息
 const getUserInfo = async (request, response) => {
   const q = `SELECT * FROM userinfo WHERE id = $1`
   try {
@@ -47,7 +47,7 @@ const getUserInfo = async (request, response) => {
   }
 }
 
-//  获取煤层气属性数据
+//  获取 煤层气属性数据
 const cbmProperty = async (request, response) => {
   const q = `SELECT * FROM cbmproperty`
   try {
@@ -62,7 +62,7 @@ const cbmProperty = async (request, response) => {
   }
 }
 
-//  获取煤层气属性数据
+//  获取 煤层气属性数据
 const cbmGas = async (request, response) => {
   const q = `SELECT * FROM cbmgas`
   try {
@@ -77,11 +77,35 @@ const cbmGas = async (request, response) => {
   }
 }
 
+//  获取 煤层气井 位置
+const wellPosition = async (request, response) => {
+  const q = `SELECT * FROM cbmproperty`
+  try {
+    let res = await pool.query(q)
+    if (res.rowCount !== 0) {
+      let results = []
+      res.rows.map(row =>
+        results.push({
+          id: row.id,
+          well_name: row.well_name,
+          baidu_lng: row.baidu_lng,
+          baidu_lat: row.baidu_lat
+        })
+      )
+      response.status(200).json({ status: true, results: results, resultsCount: res.rowCount })
+    } else {
+      response.status(200).json({ status: false, message: '暂无数据', results: res.rows })
+    }
+  } catch (err) {
+    console.log(err.stack)
+  }
+}
+
 module.exports = {
   login,
   register,
   getUserInfo,
   cbmProperty,
-  cbmGas
-  // exportpro
+  cbmGas,
+  wellPosition
 }

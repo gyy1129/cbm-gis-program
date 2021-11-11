@@ -1,16 +1,19 @@
 <template>
-  <div class="containter">
+  <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
     <div class="containter_main">
-      <baidu-map class="map" center="太原" :zoom="15" :scroll-wheel-zoom="true"> </baidu-map>
+      <!-- <el-card class="box-card"> -->
+      <div id="mapView" class="map_view" />
+      <!-- </el-card> -->
     </div>
   </div>
 </template>
 
 <script>
+import * as echarts from 'echarts'
 import Tabs from '../components/Tabs.vue'
 export default {
-  name: 'cbmWater',
+  name: 'gisData',
   components: { Tabs },
   data() {
     return {
@@ -19,8 +22,32 @@ export default {
     }
   },
   computed: {},
-  methods: {},
-  mounted() {}
+  methods: {
+    buildMap() {
+      let myMap = echarts.init(document.getElementById('mapView'))
+      // 绘制图表
+      myMap.setOption({
+        title: {
+          text: 'ECharts 入门示例'
+        },
+        tooltip: {},
+        xAxis: {
+          data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+        },
+        yAxis: {},
+        series: [
+          {
+            name: '销量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+          }
+        ]
+      })
+    }
+  },
+  mounted() {
+    this.buildMap()
+  }
 }
 </script>
 <style lang="less" scoped>
@@ -29,12 +56,10 @@ export default {
   top: 60px;
   left: 18px;
   width: 87%;
-  height: 820px;
-  border: 3px solid #fff;
-  box-shadow: 0 0 25px #a1a1a1;
-  .map {
-    width: 100%;
-    height: 100%;
+  background-color: #fff;
+  .map_view {
+    width: 600px;
+    height: 400px;
   }
 }
 </style>
