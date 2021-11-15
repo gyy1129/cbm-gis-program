@@ -28,14 +28,28 @@ export default {
       secondMenu: '煤层气井地理位置',
       ak: 'oBNh8PCBulUl1upwiNY5NIADxm39FFof',
       center: {
-        lng: 112.65,
-        lat: 35.7
+        lng: 112.6,
+        lat: 35.74
       },
       zoom: 13,
       copyright: { id: 1, content: '©537实验室' },
       point: [{ lng: 112.5265536, lat: 35.64501361 }],
       points: [],
-      pointsTotal: null
+      pointsTotal: null,
+      labelStyle: {
+        // width: '120px;',
+        color: '#fff',
+        fontSize: '12px',
+        padding: '0 3px',
+        height: '20px',
+        lineHeight: '20px',
+        fontFamily: '微软雅黑',
+        background: '#676768',
+        border: "1px solid '#ff8355'",
+        borderRadius: '3px',
+        textAlgin: 'center',
+        'z-index': 999999
+      }
     }
   },
   computed: {},
@@ -59,55 +73,19 @@ export default {
       copyCtrl.addCopyright(this.copyright)
       map.addControl(copyCtrl) // 添加 版权
 
-      let myIcon = new BMap.Icon('/jing_position.png', new BMap.Size(200, 200))
-      myIcon.setImageSize(new BMap.Size(20, 20)) //设置图标大小
-      let point = new BMap.Point(this.point[0].lng, this.point[0].lat)
-      let markergg = new BMap.Marker(point, { icon: myIcon })
-      map.addOverlay(markergg) //添加GPS marker
-
-      //label样式
-      let labelgg = new BMap.Label('端氏-001', { offset: new BMap.Size(-15, -23) })
-      labelgg.setStyle({
-        width: '120px;',
-        color: '#fff',
-        fontSize: '12px',
-        height: '20px',
-        lineHeight: '20px',
-        fontFamily: '微软雅黑',
-        background: '#676768',
-        border: "1px solid '#ff8355'",
-        borderRadius: '5px',
-        textAlgin: 'left',
-        'z-index': 999999
-      })
-      labelgg.hide()
-      markergg.setLabel(labelgg) //添加GPS label
-
-      // markergg.setAnimation(window.BMAP_ANIMATION_BOUNCE)
-      // for (let i = 0; i < this.pointsTotal; i++) {
-      //   let point = new BMap.Point(this.points[i].baidu_lng, this.points[i].baidu_lat)
-      //   let marker = new BMap.Marker(point)
-      //   map.addOverlay(marker) //添加GPS marker
-      //   let label = new BMap.Label(this.points[i].well_name, { offset: new BMap.Size(20, -10) })
-      //   marker.setLabel(label) //添加GPS label
-      // }
-
-      this.addMarkerOverHandler(markergg)
+      for (let i = 0; i < this.pointsTotal; i++) {
+        let myIcon = new BMap.Icon('/jing_position.png', new BMap.Size(200, 200))
+        myIcon.setImageSize(new BMap.Size(18, 18)) //设置图标大小
+        let point = new BMap.Point(this.points[i].baidu_lng, this.points[i].baidu_lat)
+        let marker = new BMap.Marker(point, { icon: myIcon })
+        map.addOverlay(marker) //添加GPS marker
+        let label = new BMap.Label(this.points[i].well_name, { offset: new BMap.Size(-15, -23) })
+        label.setStyle(this.labelStyle)
+        // label.hide()
+        marker.setLabel(label) //添加GPS label
+      }
     },
-    addMarkerOverHandler(marker) {
-      marker.addEventListener('mouseover', function () {
-        marker.setTop(true)
-        if (marker.getLabel()) {
-          marker.getLabel().show()
-        }
-      })
-      marker.addEventListener('mouseout', function () {
-        marker.setTop(false)
-        if (marker.getLabel()) {
-          marker.getLabel().hide()
-        }
-      })
-    },
+
     getPosition() {
       axios
         .post('http://localhost:3000/data/wellposition')

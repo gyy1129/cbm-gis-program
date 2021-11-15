@@ -28,16 +28,16 @@ export default {
       // 绘制图表
       myMap.setOption({
         title: {
-          text: 'ECharts 入门示例'
+          text: '123'
         },
         tooltip: {},
         xAxis: {
-          data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+          data: ['1', '2', '3', '4', '5', '6']
         },
         yAxis: {},
         series: [
           {
-            name: '销量',
+            name: '数量',
             type: 'bar',
             data: [5, 20, 36, 10, 10, 20]
           }
