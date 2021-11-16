@@ -46,7 +46,7 @@ export default {
     align-items: center;
     margin-left: 22px;
     /deep/.el-breadcrumb__inner {
-      color: #17889a;
+      color: #2d3e82;
     }
   }
 }

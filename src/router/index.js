@@ -20,10 +20,27 @@ const routes = [
     component: () => import('@/views/components/Register.vue'),
     meta: { title: '注册', isLogin: false }
   },
+
   {
     path: '/home',
     name: 'home',
-    component: () => import('@/views/common/Home.vue'),
+    component: () => import('@/views/layout/Layout.vue'),
+    meta: { title: '首页', isLogin: true },
+    children: [
+      {
+        path: '/home',
+        name: 'home',
+        component: () => import('@/views/components/Home.vue'),
+        meta: {
+          isLogin: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/data',
+    name: 'data',
+    component: () => import('@/views/layout/Layout.vue'),
     meta: { title: '煤层气管理项目', isLogin: true },
     children: [
       {
@@ -61,9 +78,17 @@ const routes = [
           label: '煤层气井地理位置',
           isLogin: true
         }
-      },
+      }
+    ]
+  },
+  {
+    path: '/gnn',
+    name: 'gnn',
+    component: () => import('@/views/layout/Layout.vue'),
+    meta: { title: '煤层气管理项目', isLogin: true },
+    children: [
       {
-        path: '/function/gnn/cluster',
+        path: '/gnn/cluster',
         name: 'cluster',
         component: () => import('@/views/contents/functions/cluster.vue'),
         meta: {
@@ -72,7 +97,7 @@ const routes = [
         }
       },
       {
-        path: '/function/gnn/draw',
+        path: '/gnn/draw',
         name: 'draw',
         component: () => import('@/views/contents/functions/draw.vue'),
         meta: {
@@ -81,7 +106,7 @@ const routes = [
         }
       },
       {
-        path: '/function/gnn/forecast',
+        path: '/gnn/forecast',
         name: 'forecast',
         component: () => import('@/views/contents/functions/forecast.vue'),
         meta: {
@@ -104,4 +129,13 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
+//路由守卫
+// router.beforeEach((to, from ,next) =>  {
+//   const islogin = localStorage.eletoken ? true : false
+//   if (to.path == "/login" || to.path == "/register"){
+//     next()
+//   } else {
+//     islogin ? next() : next("/login")
+//   }
+// })
 export default router

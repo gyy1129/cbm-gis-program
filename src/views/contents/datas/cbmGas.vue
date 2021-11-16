@@ -12,7 +12,12 @@
           style="width: 100%"
           height="100px"
           v-tableHeight="{ bottomOffset: 60 }"
-          :header-cell-style="{ color: '#fff', fontWeight: 'bold', backgroundColor: '#7896b0', textAlign: 'center' }"
+          :header-cell-style="{
+            color: '#fff',
+            fontWeight: 'bold',
+            backgroundColor: '#56677c',
+            textAlign: 'center'
+          }"
         >
           <el-table-column prop="id" width="80" label="序号" fixed></el-table-column>
           <el-table-column prop="date" label="排采日期" width="100" fixed></el-table-column>
@@ -206,8 +211,8 @@ export default {
   background-color: #fff;
   .btn {
     margin: 0px 0 15px 0px;
-    background-color: #3a699a;
-    border-color: #3a699a;
+    background-color: #49506a;
+    border-color: #49506a;
   }
   /deep/.el-table--enable-row-transition .el-table__body td.el-table__cell {
     text-align: center;

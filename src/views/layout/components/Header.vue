@@ -69,13 +69,18 @@ export default {
       this.getUserInfo()
     }
   }
+  // created() {
+  //   setInterval(() => {
+  //     this.getCurDate()
+  //   }, 1000)
+  // }
 }
 </script>
 <style lang="less" scoped>
 .header {
   width: 100%;
   height: 32px;
-  background-color: #5896a0;
+  background-color: #404765;
   color: #fff;
   display: flex;
   align-items: center;

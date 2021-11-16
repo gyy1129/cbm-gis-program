@@ -11,7 +11,7 @@ export default {
   components: { Tabs },
   data() {
     return {
-      firstMenu: '功能',
+      firstMenu: '图神经网络',
       secondMenu: '构图'
     }
   },

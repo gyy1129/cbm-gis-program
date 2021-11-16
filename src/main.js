@@ -24,12 +24,12 @@ router.beforeEach((to, from, next) => {
     store.state.isLogin = true
     next()
     //如果已登录，还想想进入登录注册界面，则定向回首页
-    if (!to.meta.isLogin) {
-      ElementUI.Message.error('请先退出登录')
-      next({
-        path: '/home'
-      })
-    }
+    // if (!to.meta.isLogin) {
+    //   ElementUI.Message.error('请先退出登录')
+    //   next({
+    //     path: '/home'
+    //   })
+    // }
     //如果登录标志不存在，即未登录
   } else {
     //用户想进入需要登录的页面，则定向回登录界面
