@@ -39,6 +39,7 @@ export default {
   .content {
     position: relative;
     top: 0;
+    height: 100%;
   }
 }
 </style>

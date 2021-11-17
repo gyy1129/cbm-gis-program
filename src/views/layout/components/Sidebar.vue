@@ -17,44 +17,46 @@
       <el-submenu index="/data">
         <template slot="title"><i class="el-icon-document" /><span>数据报表</span></template>
         <el-menu-item-group>
-          <el-menu-item index="/data/cbmproperty">煤层气属性数据</el-menu-item>
-          <el-menu-item index="/data/cbmgas">煤层气产气时间序列</el-menu-item>
-          <el-menu-item index="/data/cbmwater">煤层气产水时间序列</el-menu-item>
-          <el-menu-item index="/data/gisdata">煤层气井地理位置可视化</el-menu-item>
+          <el-menu-item index="/data/cbmproperty"><i class="el-icon-collection" />煤层气属性数据</el-menu-item>
+          <el-menu-item index="/data/cbmgas"><i class="el-icon-reading" />煤层气产气时间序列</el-menu-item>
+          <el-menu-item index="/data/cbmwater"><i class="el-icon-magic-stick" />煤层气产水时间序列</el-menu-item>
+          <el-menu-item index="/data/gisdata"><i class="el-icon-place" />煤层气井地理位置</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/gnn">
         <template slot="title"><i class="el-icon-menu" /><span>图神经网络</span></template>
         <el-menu-item-group>
-          <el-menu-item index="/gnn/cluster">聚类</el-menu-item>
-          <el-menu-item index="/gnn/draw">构图</el-menu-item>
-          <el-menu-item index="/gnn/forecast">预测</el-menu-item>
+          <el-menu-item index="/gnn/cluster"><i class="el-icon-magic-stick" />聚类</el-menu-item>
+          <el-menu-item index="/gnn/draw"><i class="el-icon-coordinate" />构图</el-menu-item>
+          <el-menu-item index="/gnn/forecast"><i class="el-icon-files" />预测</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/gis">
         <template slot="title"><i class="el-icon-s-promotion" /><span>gis实用功能</span></template>
+        <el-menu-item index="/gis/map">
+          <i class="el-icon-map-location"></i>
+          <span slot="title">基础地图</span>
+        </el-menu-item>
         <el-submenu index="/gis/draw">
-          <template slot="title">绘图</template>
+          <template slot="title"><i class="el-icon-add-location"></i>绘图</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/draw/cluster">绘制标准图形</el-menu-item>
-            <el-menu-item index="/gis/draw/draw">自由绘制图形</el-menu-item>
+            <el-menu-item index="/gis/draw/standard">绘制标准图形</el-menu-item>
+            <el-menu-item index="/gis/draw/free">自由绘制图形</el-menu-item>
             <el-menu-item index="/gis/draw/forecast">预测</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="/gis/edit">
-          <template slot="title">编辑</template>
+          <template slot="title"><i class="el-icon-edit" />编辑</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/edit/cluster">聚类</el-menu-item>
-            <el-menu-item index="/gis/edit/draw">构图</el-menu-item>
-            <el-menu-item index="/gis/edit/forecast">预测</el-menu-item>
+            <el-menu-item index="/gis/edit/buffer">聚类</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="/gis/spatial">
-          <template slot="title">空间分析</template>
+          <template slot="title"><i class="el-icon-location-outline" />空间分析</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/spatial/cluster">缓冲区分析</el-menu-item>
-            <el-menu-item index="/gis/spatial/draw">聚类</el-menu-item>
-            <el-menu-item index="/gis/spatial/forecast">统计聚类</el-menu-item>
+            <el-menu-item index="/gis/spatial/buffer">缓冲区分析</el-menu-item>
+            <el-menu-item index="/gis/spatial/cluster">聚类</el-menu-item>
+            <el-menu-item index="/gis/spatial/statistics">统计聚类</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
       </el-submenu>

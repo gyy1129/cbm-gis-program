@@ -20,12 +20,11 @@ const routes = [
     component: () => import('@/views/components/Register.vue'),
     meta: { title: '注册', isLogin: false }
   },
-
   {
-    path: '/home',
-    name: 'home',
+    path: '/data',
+    name: 'data',
     component: () => import('@/views/layout/Layout.vue'),
-    meta: { title: '首页', isLogin: true },
+    meta: { title: '煤层气管理项目', isLogin: true },
     children: [
       {
         path: '/home',
@@ -34,21 +33,12 @@ const routes = [
         meta: {
           isLogin: true
         }
-      }
-    ]
-  },
-  {
-    path: '/data',
-    name: 'data',
-    component: () => import('@/views/layout/Layout.vue'),
-    meta: { title: '煤层气管理项目', isLogin: true },
-    children: [
+      },
       {
         path: '/data/cbmproperty',
         name: 'cbmproperty',
         component: () => import('@/views/contents/datas/cbmProperty.vue'),
         meta: {
-          title: '煤层气属性数据', // 标题
           isLogin: true
         }
       },
@@ -57,7 +47,6 @@ const routes = [
         name: 'cbmgas',
         component: () => import('@/views/contents/datas/cbmGas.vue'),
         meta: {
-          label: '煤层气产气时间序列', // 标题
           isLogin: true
         }
       },
@@ -66,7 +55,6 @@ const routes = [
         name: 'cbmwater',
         component: () => import('@/views/contents/datas/cbmWater.vue'),
         meta: {
-          label: '煤层气产水时间序列', // 标题
           isLogin: true
         }
       },
@@ -75,7 +63,6 @@ const routes = [
         name: 'gisdata',
         component: () => import('@/views/contents/datas/gisData.vue'),
         meta: {
-          label: '煤层气井地理位置',
           isLogin: true
         }
       }
@@ -89,28 +76,99 @@ const routes = [
     children: [
       {
         path: '/gnn/cluster',
-        name: 'cluster',
-        component: () => import('@/views/contents/functions/cluster.vue'),
+        name: 'gnnCluster',
+        component: () => import('@/views/contents/gnn/cluster.vue'),
         meta: {
-          label: '聚类',
           isLogin: true
         }
       },
       {
         path: '/gnn/draw',
-        name: 'draw',
-        component: () => import('@/views/contents/functions/draw.vue'),
+        name: 'gnnDraw',
+        component: () => import('@/views/contents/gnn/draw.vue'),
         meta: {
-          label: '构图',
           isLogin: true
         }
       },
       {
         path: '/gnn/forecast',
-        name: 'forecast',
-        component: () => import('@/views/contents/functions/forecast.vue'),
+        name: 'gnnForecast',
+        component: () => import('@/views/contents/gnn/forecast.vue'),
         meta: {
-          label: '预测',
+          isLogin: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/gis',
+    name: 'gis',
+    component: () => import('@/views/layout/Layout.vue'),
+    meta: { title: '煤层气管理项目', isLogin: true },
+    children: [
+      {
+        path: '/gis/map',
+        name: 'map',
+        component: () => import('@/views/contents/gis/Map.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/draw/standard',
+        name: 'drawStandard',
+        component: () => import('@/views/contents/gis/Buffer.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/draw/free',
+        name: 'drawFree',
+        component: () => import('@/views/contents/gis/Standard.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/draw/forecast',
+        name: 'drawForecast',
+        component: () => import('@/views/contents/gis/Standard.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+
+      {
+        path: '/gis/edit/buffer',
+        name: 'editBuffer',
+        component: () => import('@/views/contents/gis/Buffer.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+
+      {
+        path: '/gis/spatial/buffer',
+        name: 'spatialBuffer',
+        component: () => import('@/views/contents/gis/Buffer.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/spatial/cluster',
+        name: 'spatialCluster',
+        component: () => import('@/views/contents/gis/Standard.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/spatial/statistics',
+        name: 'spatialStatistics',
+        component: () => import('@/views/contents/gis/Standard.vue'),
+        meta: {
           isLogin: true
         }
       }

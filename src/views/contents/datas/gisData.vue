@@ -74,10 +74,11 @@ export default {
       map.addControl(copyCtrl) // 添加 版权
 
       for (let i = 0; i < this.pointsTotal; i++) {
-        let myIcon = new BMap.Icon('/jing_position.png', new BMap.Size(200, 200))
-        myIcon.setImageSize(new BMap.Size(18, 18)) //设置图标大小
+        // let myIcon = new BMap.Icon('/images/jing_position.png', new BMap.Size(200, 200))
+        // myIcon.setImageSize(new BMap.Size(18, 18)) //设置图标大小
         let point = new BMap.Point(this.points[i].baidu_lng, this.points[i].baidu_lat)
-        let marker = new BMap.Marker(point, { icon: myIcon })
+        // let marker = new BMap.Marker(point, { icon: myIcon })
+        let marker = new BMap.Marker(point)
         map.addOverlay(marker) //添加GPS marker
         let label = new BMap.Label(this.points[i].well_name, { offset: new BMap.Size(-15, -23) })
         label.setStyle(this.labelStyle)

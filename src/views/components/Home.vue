@@ -23,7 +23,7 @@ export default {
 .home {
   width: 100%;
   height: 100%;
-  background: url(../../assets/home2.jpg) no-repeat;
+  background: url(../../assets/images/home2.jpg) no-repeat;
   background-size: 100% 100%;
   text-align: center;
   color: white;
