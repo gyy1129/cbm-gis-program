@@ -51,14 +51,6 @@ const routes = [
         }
       },
       {
-        path: '/data/cbmwater',
-        name: 'cbmwater',
-        component: () => import('@/views/contents/datas/cbmWater.vue'),
-        meta: {
-          isLogin: true
-        }
-      },
-      {
         path: '/data/gisdata',
         name: 'gisdata',
         component: () => import('@/views/contents/datas/gisData.vue'),

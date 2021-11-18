@@ -19,7 +19,6 @@
         <el-menu-item-group>
           <el-menu-item index="/data/cbmproperty"><i class="el-icon-collection" />煤层气属性数据</el-menu-item>
           <el-menu-item index="/data/cbmgas"><i class="el-icon-reading" />煤层气产气时间序列</el-menu-item>
-          <el-menu-item index="/data/cbmwater"><i class="el-icon-magic-stick" />煤层气产水时间序列</el-menu-item>
           <el-menu-item index="/data/gisdata"><i class="el-icon-place" />煤层气井地理位置</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
@@ -88,11 +87,20 @@ export default {
   position: fixed;
   width: 210px;
   height: calc(100% - 32px);
+  overflow-y: auto;
   .el-menu {
     height: 100%;
     /deep/.el-menu-item-group__title {
       padding: 0;
     }
   }
+}
+::-webkit-scrollbar {
+  width: 5px; //滚动条的宽度
+  background-color: #dedede;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #748594; //滚动条的颜色
+  border-radius: 3px; //滚动条的边框倒角
 }
 </style>

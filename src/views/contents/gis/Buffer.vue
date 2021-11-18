@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import 'ol/ol.css'
 import Map from 'ol/Map'
 import OSM from 'ol/source/OSM'
@@ -14,11 +15,14 @@ export default {
   name: 'Buffer',
   components: {},
   data() {
-    return {}
+    return {
+      data: null
+    }
   },
 
   mounted() {
     this.initMap()
+    this.python()
   },
   methods: {
     initMap() {
@@ -35,6 +39,20 @@ export default {
           zoom: 2
         })
       })
+    },
+    python() {
+      axios
+        .get('http://localhost:3000/python')
+        .then(res => {
+          if (res.data.status) {
+            this.data = res.data.results
+          } else {
+            this.$message.error(res.data.message)
+          }
+        })
+        .catch(err => {
+          this.$message.error(err.message)
+        })
     }
   }
 }

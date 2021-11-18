@@ -89,7 +89,8 @@ const wellPosition = async (request, response) => {
           id: row.id,
           well_name: row.well_name,
           baidu_lng: row.baidu_lng,
-          baidu_lat: row.baidu_lat
+          baidu_lat: row.baidu_lat,
+          showFlag: false
         })
       )
       response.status(200).json({ status: true, results: results, resultsCount: res.rowCount })
@@ -100,6 +101,25 @@ const wellPosition = async (request, response) => {
     console.log(err.stack)
   }
 }
+//  获取 煤层气属性数据
+// eslint-disable-next-line no-unused-vars
+const python = async (request, response) => {
+  const exec = require('child_process').exec
+  const execSync = require('child_process').execSync
+  // 异步执行
+  exec('python test.py', function (error, stdout, stderr) {
+    if (error) {
+      console.info('stderr : ' + stderr)
+    }
+    // console.log('exec: ' + stdout)
+    // response.status(200).json({ exec: stdout })
+  })
+  // 同步执行
+  const output = execSync('python test.py')
+  // console.log('sync: ' + output.toString())
+  // console.log('over')
+  response.status(200).json({ sync: output.toString() })
+}
 
 module.exports = {
   login,
@@ -107,5 +127,6 @@ module.exports = {
   getUserInfo,
   cbmProperty,
   cbmGas,
-  wellPosition
+  wellPosition,
+  python
 }

@@ -31,13 +31,13 @@ export default {
 </script>
 <style lang="less" scoped>
 .tabs {
-  position: absolute;
-  top: 0px;
-  left: 0px;
+  // position: absolute;
+  // top: 0px;
+  // left: 0px;
   height: 40px;
   width: 100%;
-  background-color: #fff;
-  box-shadow: 3px 2px 4px 2px #dcdcdc;
+  background-color: #5a6c9c;
+  // box-shadow: 3px 2px 4px 2px #dcdcdc;
   .el-breadcrumb {
     font-size: 15px;
     font-weight: 600;
@@ -46,7 +46,7 @@ export default {
     align-items: center;
     margin-left: 22px;
     /deep/.el-breadcrumb__inner {
-      color: #2d3e82;
+      color: #fff;
     }
   }
 }
