@@ -97,10 +97,10 @@ export default {
 }
 ::-webkit-scrollbar {
   width: 5px; //滚动条的宽度
-  background-color: #dedede;
+  background-color: #333649;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #748594; //滚动条的颜色
+  background-color: #89949e; //滚动条的颜色
   border-radius: 3px; //滚动条的边框倒角
 }
 </style>

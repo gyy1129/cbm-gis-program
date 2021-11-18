@@ -47,6 +47,7 @@ export default {
     margin-left: 22px;
     /deep/.el-breadcrumb__inner {
       color: #fff;
+      font-weight: 600;
     }
   }
 }
