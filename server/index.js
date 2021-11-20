@@ -15,6 +15,8 @@ app.post('/data/cbmgas', api.cbmGas)
 app.post('/data/wellposition', api.wellPosition)
 // app.get('/download/exportpro', api.exportpro)
 app.get('/python', api.python)
+app.post('/uploadKmeans', api.uploadKmeans)
+app.post('/gnn/getElbowResult', api.getElbowResult)
 
 app.listen(3000, err => {
   if (!err) {

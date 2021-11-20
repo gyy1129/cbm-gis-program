@@ -13,7 +13,7 @@
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div class="el-upload__tip" slot="tip">只能上传csv文件，且不超过500kb</div>
+      <div class="el-upload__tip" slot="tip">只能上传csv文件(utf-8)，且不超过500kb</div>
     </el-upload>
     <el-button icon="el-icon-upload" type="primary" style="margin-top: 20px" @click="submitUpload">上传</el-button>
   </div>
@@ -28,8 +28,9 @@ export default {
   },
   data() {
     return {
-      //文件列表
-      fileList: []
+      fileList: [],
+      flagCSV: true
+      // uploadStatus: null
     }
   },
   methods: {
@@ -44,7 +45,7 @@ export default {
       this.fileList.splice(this.fileList.indexOf(file.raw), 1)
     },
     //上传文件
-    submitUpload() {
+    async submitUpload() {
       console.log('提交文件')
       let formData = new FormData()
       // 向 formData 对象中添加文件
@@ -53,14 +54,41 @@ export default {
       })
       //设置文件保存路径
       formData.append('path', this.path)
-      //url 是你提交服务器的接口
+      // 判断是否为 空文件
+      if (this.fileList.length === 0) {
+        this.$message.error('请上传文件！')
+        return
+      }
+      // 判断是否为csv文件
+      this.judgeCSV()
+      if (this.flagCSV) {
+        this.uploadKmeans(formData)
+      }
+      // await this.$emit('uploadStatus', this.uploadStatus)
+    },
+    judgeCSV() {
+      this.fileList.map(file => {
+        if (file.name.split('.')[1] !== 'csv') {
+          this.$message.error('注意上传文件格式，需要上传cvs文件！')
+          this.flagCSV = false
+          return
+        }
+      })
+    },
+    uploadKmeans(formData) {
       axios
         .post('http://localhost:3000/uploadKmeans', formData)
         .then(res => {
-          console.log(res)
+          if (res.data.status) {
+            this.uploadStatus = true
+            this.$message.success(res.data.message)
+          } else {
+            this.uploadStatus = false
+            this.$message.error(res.data.message)
+          }
         })
         .catch(err => {
-          console.log(err)
+          this.$message.error(err.message)
         })
     }
   },
