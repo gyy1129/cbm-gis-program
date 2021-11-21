@@ -303,20 +303,20 @@ export default {
     margin: 20px 0 0 0;
   }
 }
+.explain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  p {
+    color: red;
+    padding-bottom: 8px;
+  }
+}
 </style>
 
 <style lang="less">
 .el-dialog--center .el-dialog__body {
   display: flex;
   justify-content: center;
-  .explain {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    p {
-      color: red;
-      padding-bottom: 8px;
-    }
-  }
 }
 </style>
