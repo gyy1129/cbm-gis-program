@@ -17,6 +17,7 @@ app.post('/data/wellposition', api.wellPosition)
 app.get('/python', api.python)
 app.post('/uploadKmeans', api.uploadKmeans)
 app.post('/gnn/getElbowResult', api.getElbowResult)
+app.post('/gnn/getClusterResult', api.getClusterResult)
 
 app.listen(3000, err => {
   if (!err) {

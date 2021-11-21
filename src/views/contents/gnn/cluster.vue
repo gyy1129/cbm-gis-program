@@ -14,16 +14,16 @@
             </el-col>
           </el-row>
           <!-- 聚类方法 form-->
-          <el-form :model="cluster" ref="cluster" label-width="100px" class="cluster_layout">
+          <el-form :model="clusterMax" ref="clusterMax" label-width="120px" class="cluster_layout" :rules="rules">
             <el-row :gutter="12">
               <el-col :span="6">
                 <el-form-item label="最大k值：" prop="maxK">
-                  <el-input v-model.trim="cluster.maxK" placeholder="请输入最大k值" clearable></el-input>
+                  <el-input v-model.number="clusterMax.maxK" placeholder="请输入最大k值" clearable></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="6">
-                <el-form-item label="上传文件名：" prop="fileName">
-                  <el-input v-model="cluster.fileName" placeholder="请输入上传文件名" clearable></el-input>
+                <el-form-item label="上传文件名：" prop="fileNameMax">
+                  <el-input v-model="clusterMax.fileNameMax" placeholder="请输入上传文件名" clearable></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="6">
@@ -32,10 +32,17 @@
                 </el-form-item>
               </el-col>
             </el-row>
+          </el-form>
+          <el-form :model="clusterBest" ref="clusterBest" label-width="120px" class="cluster_layout" :rules="rules">
             <el-row :gutter="12">
               <el-col :span="6">
                 <el-form-item label="最佳k值：" prop="bestK">
-                  <el-input v-model.trim="cluster.bestK" placeholder="请输入最佳k值" clearable></el-input>
+                  <el-input v-model.number="clusterBest.bestK" placeholder="请输入最佳k值" clearable></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="上传文件名：" prop="fileNameBest">
+                  <el-input v-model="clusterBest.fileNameBest" placeholder="请输入上传文件名" clearable></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="6">
@@ -58,7 +65,15 @@
         <!-- 聚类结果 -->
         <el-col :span="12">
           <el-card class="box_card mb22">
-            <el-empty description="暂无结果" class="empty"></el-empty>
+            <el-button @click="onExport" class="mb22" type="primary" plain>导出结果</el-button>
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 15, maxRows: 15 }"
+              placeholder="等待聚类结果..."
+              v-model="clusterValueShow"
+              readonly
+              resize="none"
+            ></el-input>
           </el-card>
         </el-col>
       </el-row>
@@ -76,6 +91,7 @@
 <script>
 import * as echarts from 'echarts'
 import axios from 'axios'
+import { EXPORT_ALL } from '@/utils/index'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
 export default {
@@ -87,14 +103,35 @@ export default {
       secondMenu: '聚类',
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
-      cluster: {
-        maxK: null,
-        bestK: null,
-        fileName: null
+      clusterMax: {
+        maxK: 7,
+        fileNameMax: 'test'
+      },
+      clusterBest: {
+        bestK: 4,
+        fileNameBest: 'test'
       },
       kValue: [],
       picShow: false,
-      ElbowValue: []
+      ElbowValue: [],
+      clusterValue: [],
+      clusterValueShow: '',
+      rules: {
+        maxK: [
+          { required: true, message: '请输入最大k值', trigger: 'blur' },
+          { type: 'number', message: '最大k值必须为数字值' },
+          { pattern: /^([2-9]|1[0-5])$/, message: 'k值范围要在2-15', trigger: 'blur' }
+        ],
+        bestK: [
+          { required: true, message: '请输入最佳k值', trigger: 'blur' },
+          { type: 'number', message: '最大k值必须为数字值' },
+          { pattern: /^([2-9]|1[0-5])$/, message: 'k值范围要在2-15', trigger: 'blur' }
+        ],
+        fileNameMax: [{ required: true, message: '请输入上传文件名', trigger: 'blur' }],
+        fileNameBest: [{ required: true, message: '请输入上传文件名', trigger: 'blur' }]
+      },
+      exportTitle: [{ label: '聚类结果', prop: 'clusterValue', width: '100' }],
+      exportResult: []
     }
   },
   computed: {},
@@ -105,38 +142,27 @@ export default {
     //   }
     //   console.log('uploadStatus', val)
     // },
-    onCluster() {
-      console.log(this.cluster)
-      if (!this.cluster.bestK) {
-        this.$message.error('请输入最佳k值!')
-        return
-      }
-      if (!this.cluster.fileName) {
-        this.$message.error('请输入上传文件名!')
-        return
-      }
-    },
     drawGraph() {
-      if (!this.cluster.maxK) {
-        this.$message.error('请输入最大k值!')
-        return
-      }
-      if (!this.cluster.fileName) {
-        this.$message.error('请输入上传文件名!')
-        return
-      }
-
-      console.log(this.ElbowValue)
-      this.picShow = true
-      this.getElbowResult()
-      // debugger
-      console.log(this.ElbowValue)
-      this.getElbow()
+      this.$refs.clusterMax.validate(valid => {
+        if (valid) {
+          this.picShow = true
+          this.getElbowResult()
+        }
+      })
+    },
+    onCluster() {
+      this.$refs.clusterMax.validate(valid => {
+        if (valid) {
+          this.picShow = true
+          this.getClusterResult()
+        }
+      })
     },
     getElbow() {
+      if (this.myElbow) this.myElbow.dispose()
       // 初始化echarts实例
-      let myElbow = echarts.init(document.getElementById('Elbow'))
-      this.kValue = Array.from(Array(Number(this.cluster.maxK)), (v, k) => k + 1)
+      this.myElbow = echarts.init(document.getElementById('Elbow'))
+      this.kValue = Array.from(Array(Number(this.clusterMax.maxK)), (v, k) => k + 1)
       // 配置图表中的数据和样式
       const option = {
         title: {
@@ -181,25 +207,60 @@ export default {
         ]
       }
       // 绘制图表
-      myElbow.setOption(option)
+      this.myElbow.setOption(option)
     },
+
     getElbowResult() {
       const params = {
-        maxK: this.cluster.maxK,
-        fileName: this.cluster.fileName
+        maxK: this.clusterMax.maxK,
+        fileNameMax: this.clusterMax.fileNameMax
       }
       axios
         .post('http://localhost:3000/gnn/getElbowResult', params)
         .then(res => {
           if (res.data.status) {
             this.ElbowValue = res.data.results
+            this.getElbow()
           } else {
             this.$message.error(res.data.message)
           }
         })
         .catch(err => {
           console.log(err)
+          this.$message.error(err.message)
         })
+    },
+    getClusterResult() {
+      const params = {
+        bestK: this.clusterBest.bestK,
+        fileNameBest: this.clusterBest.fileNameBest
+      }
+      axios
+        .post('http://localhost:3000/gnn/getClusterResult', params)
+        .then(res => {
+          if (res.data.status) {
+            this.clusterValue = res.data.results
+            this.clusterValueShow = res.data.results + ''
+            console.log(this.clusterValue)
+          } else {
+            this.$message.error(res.data.message)
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message.error(err.message)
+        })
+    },
+    onExport() {
+      if (this.clusterValue.length === 0) {
+        this.$message.error('聚类结果为空，不能导出文件')
+        return
+      }
+      this.clusterValue.map(val => {
+        let params = { clusterValue: val }
+        this.exportResult.push(params)
+      })
+      EXPORT_ALL(this.exportTitle, this.exportResult, 'K-means聚类结果')
     }
   },
   mounted() {}
@@ -221,15 +282,21 @@ export default {
     margin-bottom: 22px;
   }
   .box_card {
-    display: flex;
-    justify-content: center;
     #Elbow {
       width: 600px;
       height: 400px;
+      margin: 0 auto;
     }
     .empty {
       width: 600px;
       height: 400px;
+      margin: 0 auto;
+    }
+    /deep/.el-card__body {
+      width: 100%;
+      .el-textarea {
+        width: 90%;
+      }
     }
   }
   .cluster_layout {

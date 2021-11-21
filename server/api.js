@@ -174,18 +174,19 @@ const uploadKmeans = async (req, res) => {
 // 执行KmeansElbow.py文件
 const getElbowResult = async (request, response) => {
   let maxK = request.body.maxK
-  let fileName = request.body.fileName
+  let fileNameMax = request.body.fileNameMax
+  console.log(request.body)
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
   let exists = false
   allFiles.find(item => {
     let name = item.split('\\')[1]
-    if (name === fileName + '.csv') exists = true
+    if (name === fileNameMax + '.csv') exists = true
   })
   if (!exists) response.status(200).json({ status: false, message: '该文件没有上传' })
 
   // 异步执行
-  exec('python ./python/KmeansElbow.py' + ' ' + maxK + ' ' + fileName + ' ', function (error, stdout, stderr) {
+  exec('python ./python/KmeansElbow.py' + ' ' + maxK + ' ' + fileNameMax + ' ', function (error, stdout, stderr) {
     if (error) {
       console.info('stderr : ' + stderr)
       response.status(200).json({ status: false, results: stderr })
@@ -201,6 +202,33 @@ const getElbowResult = async (request, response) => {
   // // console.log('over')
   // response.status(200).json({ sync: output.toString() })
 }
+// 执行KmeansElbow.py文件
+const getClusterResult = async (request, response) => {
+  let bestK = request.body.bestK
+  let fileNameBest = request.body.fileNameBest
+  console.log(request.body)
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  let exists = false
+  allFiles.find(item => {
+    let name = item.split('\\')[1]
+    if (name === fileNameBest + '.csv') exists = true
+  })
+  if (!exists) response.status(200).json({ status: false, message: '该文件没有上传' })
+
+  // 异步执行
+  exec('python ./python/Kmeans.py' + ' ' + bestK + ' ' + fileNameBest + ' ', function (error, stdout, stderr) {
+    if (error) {
+      console.info('stderr : ' + stderr)
+      response.status(200).json({ status: false, results: stderr })
+    }
+    console.log('exec: ' + stdout)
+    let value = stdout.split('[')[1].split(']')[0].split(',')
+    let result = value.map(item => Number(item))
+    console.log(result)
+    response.status(200).json({ status: true, results: result })
+  })
+}
 module.exports = {
   login,
   register,
@@ -210,5 +238,6 @@ module.exports = {
   wellPosition,
   python,
   uploadKmeans,
-  getElbowResult
+  getElbowResult,
+  getClusterResult
 }
