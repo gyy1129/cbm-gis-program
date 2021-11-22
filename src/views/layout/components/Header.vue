@@ -85,12 +85,14 @@ export default {
   display: flex;
   align-items: center;
   .header_left {
-    position: fixed;
-    left: 20px;
+    // position: fixed;
+    // left: 20px;
+    margin-left: 20px;
   }
   .header_right {
-    position: fixed;
-    right: 20px;
+    // position: fixed;
+    // right: 20px;
+    margin-left: auto;
     .right_content {
       display: flex;
       align-items: center;

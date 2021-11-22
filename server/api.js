@@ -183,7 +183,10 @@ const getElbowResult = async (request, response) => {
     let name = item.split('\\')[1]
     if (name === fileNameMax + '.csv') exists = true
   })
-  if (!exists) response.status(200).json({ status: false, message: '该文件没有上传' })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
 
   // 异步执行
   exec('python ./python/KmeansElbow.py' + ' ' + maxK + ' ' + fileNameMax + ' ', function (error, stdout, stderr) {
@@ -214,7 +217,10 @@ const getClusterResult = async (request, response) => {
     let name = item.split('\\')[1]
     if (name === fileNameBest + '.csv') exists = true
   })
-  if (!exists) response.status(200).json({ status: false, message: '该文件没有上传' })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
 
   // 异步执行
   exec('python ./python/Kmeans.py' + ' ' + bestK + ' ' + fileNameBest + ' ', function (error, stdout, stderr) {
@@ -229,6 +235,93 @@ const getClusterResult = async (request, response) => {
     response.status(200).json({ status: true, results: result })
   })
 }
+
+// 读取上传文件 百度坐标 展示
+const displaywell = async (request, response) => {
+  let fileName = request.body.fileName
+  console.log(request.body)
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  let exists = false
+  allFiles.find(item => {
+    let name = item.split('\\')[1]
+    if (name === fileName + '.csv') exists = true
+  })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
+  fs.readFile('public/' + fileName + '.csv', 'UTF-8', (err, data) => {
+    if (err) {
+      console.log(err)
+      response.status(200).json({ status: false, message: err.message })
+    }
+    data = data.toString()
+    let table = []
+    let rows = []
+    rows = data.split('\r\n')
+    for (let i = 1; i < rows.length; i++) {
+      table.push(rows[i].split(','))
+    }
+    let points = []
+    table.map(item => {
+      let point = {}
+      point.well_name = item[0]
+      point.baidu_lng = item[3]
+      point.baidu_lat = item[4]
+      points.push(point)
+    })
+    console.log(points)
+    response.status(200).json({ status: true, results: points, resultsCount: points.length, message: '读取成功' })
+  })
+}
+
+// 执行KmeansElbow.py文件
+const getAdjacent = async (request, response) => {
+  let scopeVal = request.body.scopeVal
+  let fileName = request.body.fileName
+  console.log(request.body)
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  let exists = false
+  allFiles.find(item => {
+    let name = item.split('\\')[1]
+    if (name === fileName + '.csv') exists = true
+  })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
+
+  // 异步执行
+  exec('python ./python/adjacentMatrix.py' + ' ' + scopeVal + ' ' + fileName + ' ', function (error, stdout, stderr) {
+    if (error) {
+      console.info('stderr : ' + stderr)
+      response.status(200).json({ status: false, results: stderr })
+    }
+    // console.log('exec: ' + stdout)
+    let value = stdout.split('(')
+    let valueArr = []
+    for (let i = 1; i < value.length; i++) {
+      let value1 = value[i].split(')')
+      valueArr.push(value1)
+    }
+    let arr1 = []
+    valueArr.map(item => {
+      let a = item[0].split('[')[1].split(']')[0].split('\r\n')
+      let arr = []
+      a.map(val => {
+        let b = val.split(',')
+        b.map(val => {
+          let c = val.split('.')
+          if (c[0] !== '') arr.push(Number(c[0]))
+        })
+      })
+      arr1.push(arr)
+    })
+    response.status(200).json({ status: true, results: arr1, message: '生成成功！' })
+  })
+}
 module.exports = {
   login,
   register,
@@ -239,5 +332,7 @@ module.exports = {
   python,
   uploadKmeans,
   getElbowResult,
-  getClusterResult
+  getClusterResult,
+  displaywell,
+  getAdjacent
 }
