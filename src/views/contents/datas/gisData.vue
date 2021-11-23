@@ -94,6 +94,7 @@ export default {
     handler({ BMap, map }) {
       this.BMap = BMap // 百度地图
       this.map = map // 当前地图
+      // this.map.setCurrentCity('晋城')
     },
 
     // 点击点坐标赋值

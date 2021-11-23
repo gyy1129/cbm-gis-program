@@ -19,6 +19,7 @@ app.post('/uploadKmeans', api.uploadKmeans)
 app.post('/gnn/getElbowResult', api.getElbowResult)
 app.post('/gnn/getClusterResult', api.getClusterResult)
 app.post('/gnn/displaywell', api.displaywell)
+app.post('/gnn/getConnect', api.getConnect)
 app.post('/gnn/getAdjacent', api.getAdjacent)
 
 app.listen(3000, err => {

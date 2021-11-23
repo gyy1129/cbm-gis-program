@@ -82,6 +82,15 @@ const routes = [
           isLogin: true
         }
       },
+
+      {
+        path: '/gnn/adjMatrix',
+        name: 'gnnAdjMatrix',
+        component: () => import('@/views/contents/gnn/adjacentMatrix.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
       {
         path: '/gnn/forecast',
         name: 'gnnForecast',

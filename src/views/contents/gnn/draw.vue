@@ -42,7 +42,6 @@
             <el-col :span="12">
               <el-form-item>
                 <el-button type="primary" @click="getConnect">该范围内构图</el-button>
-                <el-button type="primary" @click="openAdjacent" plain>生成邻接矩阵</el-button>
               </el-form-item>
             </el-col>
           </el-row>
@@ -64,6 +63,15 @@
             <bm-label :content="point.well_name" :labelStyle="labelStyle" :offset="{ width: -10, height: 27 }" />
           </bm-marker>
         </bml-marker-clusterer>
+        <bm-polyline
+          v-for="(line, i) in lineList"
+          :key="i"
+          :path="line"
+          stroke-color="red"
+          :stroke-opacity="0.5"
+          :stroke-weight="10"
+        >
+        </bm-polyline>
       </baidu-map>
     </div>
     <el-dialog title="上传文件" :visible.sync="uploadDialog" center append-to-body>
@@ -73,21 +81,6 @@
         <img src="@/assets/images/scope_format.png" alt="文件上传格式" width="70%" />
       </div>
     </el-dialog>
-    <el-dialog title="生成邻接矩阵" :visible.sync="adjacentDialog" width="30%" append-to-body>
-      <el-input
-        type="textarea"
-        :autosize="{ minRows: 15, maxRows: 15 }"
-        placeholder="等待生成结果..."
-        v-model="adjExport"
-        readonly
-        resize="none"
-      ></el-input>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="adjacentDialog = false">取消</el-button>
-        <el-button type="primary" @click="getAdjacent">确定生成邻接矩阵</el-button>
-        <el-button @click="exportAdjacent" type="primary" plain>下载生成结果</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -96,7 +89,6 @@ import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
 import { BmlMarkerClusterer } from 'vue-baidu-map'
-// import { EXPORT_ALL } from '@/utils/index'
 export default {
   name: 'draw',
   components: { Tabs, uploadFile, BmlMarkerClusterer },
@@ -106,9 +98,6 @@ export default {
       secondMenu: '构图',
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
-      adjacentDialog: false,
-      adjacentMatrix: null,
-      adjExport: '',
       displayWell: {
         fileName: 'scope'
       },
@@ -143,19 +132,18 @@ export default {
         border: "1px solid '#ff8355'",
         borderRadius: '3px',
         textAlgin: 'center'
-        // 'z-index': 999999
-      }
+      },
+      lineList: []
     }
   },
-  computed: {},
   methods: {
     //百度地图初始化
     handler({ BMap, map }) {
       this.BMap = BMap // 百度地图
       this.map = map // 当前地图
     },
+    // 显示井
     onDisplayWell() {
-      console.log('显示井')
       const params = {
         fileName: this.displayWell.fileName
       }
@@ -174,27 +162,18 @@ export default {
           this.$message.error(err.message)
         })
     },
+    // 该范围内构图
     getConnect() {
-      console.log('构图')
-    },
-    openAdjacent() {
-      this.adjacentDialog = true
-    },
-    getAdjacent() {
       const params = {
         scopeVal: this.wellScope.scopeVal,
         fileName: this.wellScope.fileName
       }
       axios
-        .post('http://localhost:3000/gnn/getAdjacent', params)
+        .post('http://localhost:3000/gnn/getConnect', params)
         .then(res => {
           if (res.data.status) {
-            this.adjacentMatrix = res.data.results
-            let rows = ''
-            this.adjacentMatrix.map(arr => {
-              rows = rows + arr + '\n'
-            })
-            this.adjExport = rows
+            this.lineList = res.data.results
+            console.log(this.lineList)
             this.$message.success(res.data.message)
           } else {
             this.$message.error(res.data.message)
@@ -203,53 +182,6 @@ export default {
         .catch(err => {
           this.$message.error(err.message)
         })
-    },
-    exportAdjacent() {
-      if (!this.adjacentMatrix) {
-        this.$message.error('当前没有可下载文件，请先生成邻接矩阵')
-        return
-      }
-      let rows = ''
-      this.adjacentMatrix.map(arr => {
-        rows = rows + arr + '\n'
-      })
-      try {
-        if (this.MyBrowserIsIE()) {
-          // IE10以及Edge浏览器
-          var BOM = '\uFEFF'
-          // 文件转Blob格式
-          var csvData = new Blob([BOM + rows], { type: 'text/csv' })
-          navigator.msSaveBlob(csvData)
-        } else {
-          let csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + rows
-          // 非ie 浏览器
-          this.createDownLoadClick(csvContent, '邻接矩阵.csv')
-        }
-      } catch (err) {
-        alert(err)
-      }
-    },
-    //创建a标签下载
-    createDownLoadClick(content, fileName) {
-      const link = document.createElement('a')
-      link.href = encodeURI(content)
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    },
-    // 判断是否IE浏览器
-    MyBrowserIsIE() {
-      let isIE = false
-      if (navigator.userAgent.indexOf('compatible') > -1 && navigator.userAgent.indexOf('MSIE') > -1) {
-        // ie浏览器
-        isIE = true
-      }
-      if (navigator.userAgent.indexOf('Trident') > -1) {
-        // edge 浏览器
-        isIE = true
-      }
-      return isIE
     }
   },
   mounted() {}

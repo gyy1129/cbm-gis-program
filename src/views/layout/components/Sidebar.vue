@@ -27,6 +27,7 @@
         <el-menu-item-group>
           <el-menu-item index="/gnn/cluster"><i class="el-icon-magic-stick" />聚类</el-menu-item>
           <el-menu-item index="/gnn/draw"><i class="el-icon-coordinate" />构图</el-menu-item>
+          <el-menu-item index="/gnn/adjMatrix"><i class="el-icon-news" />邻接矩阵</el-menu-item>
           <el-menu-item index="/gnn/forecast"><i class="el-icon-files" />预测</el-menu-item>
         </el-menu-item-group>
       </el-submenu>

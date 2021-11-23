@@ -239,7 +239,6 @@ const getClusterResult = async (request, response) => {
 // 读取上传文件 百度坐标 展示
 const displaywell = async (request, response) => {
   let fileName = request.body.fileName
-  console.log(request.body)
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
   let exists = false
@@ -271,12 +270,60 @@ const displaywell = async (request, response) => {
       point.baidu_lat = item[4]
       points.push(point)
     })
-    console.log(points)
-    response.status(200).json({ status: true, results: points, resultsCount: points.length, message: '读取成功' })
+    // console.log(points)
+    response.status(200).json({ status: true, results: points, resultsCount: points.length, message: '读取文件成功！' })
   })
 }
 
-// 执行KmeansElbow.py文件
+// 执行scope.py文件
+const getConnect = async (request, response) => {
+  let scopeVal = request.body.scopeVal
+  let fileName = request.body.fileName
+  console.log(request.body)
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  let exists = false
+  allFiles.find(item => {
+    let name = item.split('\\')[1]
+    if (name === fileName + '.csv') exists = true
+  })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
+
+  // 异步执行
+  exec('python ./python/scope.py' + ' ' + scopeVal + ' ' + fileName + ' ', function (error, stdout, stderr) {
+    if (error) {
+      console.info('stderr : ' + stderr)
+      response.status(200).json({ status: false, results: stderr })
+    }
+    // console.log('exec: ' + stdout)
+    let value = stdout.split('[').slice(2)
+    let valueArr = value.map(str => {
+      let val = str.split(']')[0].split(',')
+      return val
+    })
+    // console.log(valueArr)
+    let list = []
+    valueArr.map(val => {
+      let obj1 = {}
+      let obj2 = {}
+      let listArr = []
+      obj1.lng = Number(val[0])
+      obj1.lat = Number(val[1])
+      obj2.lng = Number(val[2])
+      obj2.lat = Number(val[3])
+      listArr.push(obj1)
+      listArr.push(obj2)
+      list.push(listArr)
+    })
+    console.log(list)
+    response.status(200).json({ status: true, results: list, message: '井对获取成功！' })
+  })
+}
+
+// 执行adjacentMatrix.py文件
 const getAdjacent = async (request, response) => {
   let scopeVal = request.body.scopeVal
   let fileName = request.body.fileName
@@ -300,26 +347,45 @@ const getAdjacent = async (request, response) => {
       response.status(200).json({ status: false, results: stderr })
     }
     // console.log('exec: ' + stdout)
-    let value = stdout.split('(')
-    let valueArr = []
-    for (let i = 1; i < value.length; i++) {
-      let value1 = value[i].split(')')
-      valueArr.push(value1)
-    }
-    let arr1 = []
-    valueArr.map(item => {
-      let a = item[0].split('[')[1].split(']')[0].split('\r\n')
-      let arr = []
-      a.map(val => {
-        let b = val.split(',')
-        b.map(val => {
-          let c = val.split('.')
-          if (c[0] !== '') arr.push(Number(c[0]))
-        })
-      })
-      arr1.push(arr)
+    let value = stdout.split('\r\n')
+    // 处理 井名
+    let wellName = value[0].split('[')[1].split(']')[0].split(',')
+    let wellName1 = []
+    wellName.map(str => {
+      let val = str.split("'")[1]
+      let obj = {}
+      obj.name = val
+      wellName1.push(obj)
     })
-    response.status(200).json({ status: true, results: arr1, message: '生成成功！' })
+    // console.log(wellName1)
+    // 处理 井对
+    let wellPair = value[1].split('[[')[1].split(']]')[0].split('], [')
+    let wellPair1 = []
+    wellPair.map(str => {
+      let val = str.split("'")
+      let obj = {}
+      obj.source = val[1]
+      obj.target = val[3]
+      obj.name = 1
+      wellPair1.push(obj)
+    })
+    // console.log(wellPair1)
+    // 处理 邻接矩阵
+    let value1 = value.slice(2)
+    let allStr = ''
+    value1.map(str => {
+      allStr = allStr + str
+    })
+    let str = allStr.split('[array([')[1].split('])]')[0].split(']), array([')
+    let adj = []
+    str.map(val => {
+      let val1 = val.split('., ')
+      let val2 = val1.map(str => Number(str))
+      adj.push(val2)
+    })
+    response
+      .status(200)
+      .json({ status: true, adjMatrix: adj, wellPair: wellPair1, wellName: wellName1, message: '生成邻接矩阵成功！' })
   })
 }
 module.exports = {
@@ -334,5 +400,6 @@ module.exports = {
   getElbowResult,
   getClusterResult,
   displaywell,
+  getConnect,
   getAdjacent
 }
