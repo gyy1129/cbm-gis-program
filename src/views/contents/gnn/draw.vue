@@ -2,12 +2,12 @@
   <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
     <div class="containter_main">
-      <el-card class="box-card">
-        <el-row :gutter="12" class="el_row_first">
+      <el-card class="card-box" v-show="fromDisplay">
+        <el-row :gutter="12">
           <el-col :span="3">
-            <el-button type="primary" @click="uploadDialog = true">上传文件</el-button>
+            <el-button type="primary" @click="uploadDialog = true" size="small">上传文件</el-button>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="16">
             <p>使用说明：需要先上传文件(文件名不要用中文)，再进行功能操作！</p>
           </el-col>
         </el-row>
@@ -15,40 +15,66 @@
         <el-form :model="displayWell" ref="displayWell" label-width="120px" class="well_scope" :rules="rules">
           <el-row :gutter="12">
             <el-col :span="6">
-              <el-form-item label="上传文件名：" prop="fileName">
-                <el-input v-model="displayWell.fileName" placeholder="请输入上传文件名" clearable></el-input>
+              <el-form-item label="上传文件名：" prop="fileName" style="margin-bottom: 0">
+                <el-input
+                  v-model="displayWell.fileName"
+                  placeholder="请输入上传文件名"
+                  clearable
+                  size="small"
+                ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item>
-                <el-button type="primary" @click="onDisplayWell">显示井</el-button>
+            <el-col :span="6">
+              <el-form-item style="margin-bottom: 0">
+                <el-button type="primary" @click="getWell" size="small">获取井位置</el-button>
               </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-radio-group v-model="well" size="small" @change="changeWell" :disabled="disabledWell">
+                <el-radio label="displayWell">显示井</el-radio>
+                <el-radio label="hideWell">不显示井</el-radio>
+              </el-radio-group>
             </el-col>
           </el-row>
         </el-form>
-        <!-- 构图 + 邻接矩阵 -->
+        <!-- 该范围内构图 -->
         <el-form :model="wellScope" ref="wellScope" label-width="120px" class="well_scope" :rules="rules">
-          <el-row :gutter="12">
+          <el-row :gutter="10">
             <el-col :span="6">
-              <el-form-item label="范围：" prop="scopeVal">
-                <el-input v-model.number="wellScope.scopeVal" placeholder="请输入井的范围值" clearable></el-input>
+              <el-form-item label="范围：" prop="scopeVal" style="margin-bottom: 0">
+                <el-input
+                  v-model.number="wellScope.scopeVal"
+                  placeholder="请输入井的范围值"
+                  clearable
+                  size="small"
+                ></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="6">
-              <el-form-item label="上传文件名：" prop="fileName">
-                <el-input v-model="wellScope.fileName" placeholder="请输入上传文件名" clearable></el-input>
+              <el-form-item label="上传文件名：" prop="fileName" style="margin-bottom: 0">
+                <el-input v-model="wellScope.fileName" placeholder="请输入上传文件名" clearable size="small"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item>
-                <el-button type="primary" @click="getConnect">该范围内构图</el-button>
+            <el-col :span="6">
+              <el-form-item style="margin-bottom: 0">
+                <el-button type="primary" @click="getConnect" size="small"> 该范围内构图 </el-button>
               </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-radio-group v-model="connect" size="small" @change="changeConnect" :disabled="disabledConnect">
+                <el-radio label="displayConnect">显示连接</el-radio>
+                <el-radio label="hideConnect">隐藏连接</el-radio>
+              </el-radio-group>
             </el-col>
           </el-row>
         </el-form>
       </el-card>
 
       <baidu-map class="map" :scroll-wheel-zoom="true" :center="center" :zoom="zoom" @ready="handler">
+        <el-radio-group v-model="fromDisplay" class="radio" size="small">
+          <el-radio-button :label="true">展开</el-radio-button>
+          <el-radio-button :label="false">收起</el-radio-button>
+        </el-radio-group>
         <bm-scale anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-scale>
         <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
         <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_SATELLITE_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
@@ -63,6 +89,7 @@
             <bm-label :content="point.well_name" :labelStyle="labelStyle" :offset="{ width: -10, height: 27 }" />
           </bm-marker>
         </bml-marker-clusterer>
+
         <bm-polyline
           v-for="(line, i) in lineList"
           :key="i"
@@ -98,6 +125,11 @@ export default {
       secondMenu: '构图',
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
+      fromDisplay: false,
+      well: 'hideWell',
+      connect: 'hideConnect',
+      disabledWell: true,
+      disabledConnect: true,
       displayWell: {
         fileName: 'scope'
       },
@@ -122,6 +154,8 @@ export default {
       zoom: 11,
       points: [],
       pointsTotal: null,
+      pointsResults: [], // 接口返回 井
+      pointsTotalResults: null, // 接口返回 井数
       labelStyle: {
         padding: '0 3px',
         height: '20px',
@@ -142,8 +176,8 @@ export default {
       this.BMap = BMap // 百度地图
       this.map = map // 当前地图
     },
-    // 显示井
-    onDisplayWell() {
+    // 获取井位置
+    getWell() {
       const params = {
         fileName: this.displayWell.fileName
       }
@@ -151,8 +185,8 @@ export default {
         .post('http://localhost:3000/gnn/displaywell', params)
         .then(res => {
           if (res.data.status) {
-            this.points = res.data.results
-            this.pointsTotal = res.data.resultsCount
+            this.pointsResults = res.data.results
+            this.pointsTotalResults = res.data.resultsCount
             this.$message.success(res.data.message)
           } else {
             this.$message.error(res.data.message)
@@ -161,6 +195,17 @@ export default {
         .catch(err => {
           this.$message.error(err.message)
         })
+      this.disabledWell = false
+    },
+    // 切换井的显示
+    changeWell(label) {
+      if (label === 'displayWell') {
+        this.points = this.pointsResults
+        this.pointsTotal = this.pointsTotalResults
+      } else {
+        this.points = []
+        this.pointsTotal = 0
+      }
     },
     // 该范围内构图
     getConnect() {
@@ -172,8 +217,7 @@ export default {
         .post('http://localhost:3000/gnn/getConnect', params)
         .then(res => {
           if (res.data.status) {
-            this.lineList = res.data.results
-            console.log(this.lineList)
+            this.lineListResults = res.data.results
             this.$message.success(res.data.message)
           } else {
             this.$message.error(res.data.message)
@@ -182,6 +226,11 @@ export default {
         .catch(err => {
           this.$message.error(err.message)
         })
+      this.disabledConnect = false
+    },
+    // 切换 连接
+    changeConnect(label) {
+      label === 'displayConnect' ? (this.lineList = this.lineListResults) : (this.lineList = [])
     }
   },
   mounted() {}
@@ -189,11 +238,18 @@ export default {
 </script>
 <style lang="less" scoped>
 .containter_main {
-  position: absolute;
-  top: 60px;
-  left: 18px;
-  width: 87%;
-  .el_row_first {
+  position: relative;
+  // top: 60px;
+  // left: 18px;
+  width: 89%;
+  height: 92vh;
+  .card-box {
+    position: absolute;
+    top: 13%;
+    left: 2%;
+    z-index: 2;
+  }
+  /deep/.el-row {
     display: flex;
     align-items: center;
     color: red;
@@ -204,13 +260,9 @@ export default {
   .well_scope {
     margin: 20px 0 0 0;
   }
-
   .map {
     width: 100%;
-    height: 560px;
-    margin-top: 15px;
-    border: 2px solid #fff;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+    height: 100%;
     /deep/.BMap_bubble_title {
       color: #d86513;
       font-weight: 600;
@@ -222,14 +274,11 @@ export default {
     /deep/.anchorBL {
       display: none; // 删除 百度地图自带的版权
     }
-    .search_form {
+    .radio {
       position: absolute;
-      top: 5%;
+      top: 6%;
       left: 2%;
-      z-index: 2;
-      .el-form-item {
-        margin: 0 2px 0 0;
-      }
+      // z-index: 2;
     }
   }
 }

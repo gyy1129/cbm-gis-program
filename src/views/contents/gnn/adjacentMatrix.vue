@@ -130,6 +130,7 @@ export default {
             roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
             draggable: true, //指示节点是否可以拖动
             focusNodeAdjacency: true, //当鼠标移动到节点上，突出显示节点以及节点的边和邻接节点
+            // focus: 'adjacency',
             label: {
               show: true
             },
