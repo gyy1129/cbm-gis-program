@@ -72,6 +72,7 @@ import * as echarts from 'echarts'
 import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
+import { EXPORT_CSV } from '@/utils/index'
 export default {
   name: 'adjacentMatrix',
   components: { Tabs, uploadFile },
@@ -147,7 +148,6 @@ export default {
           }
         ]
       }
-      // 绘制图表
       this.myGraph.setOption(option)
     },
     // 生成邻接矩阵
@@ -177,48 +177,13 @@ export default {
           this.$message.error(err.message)
         })
     },
+    // 下载生成结果
     exportAdjacent() {
       if (!this.adjacentMatrix) {
         this.$message.error('当前没有可下载文件，请先生成邻接矩阵')
         return
       }
-      try {
-        if (this.MyBrowserIsIE()) {
-          // IE10以及Edge浏览器
-          var BOM = '\uFEFF'
-          // 文件转Blob格式
-          var csvData = new Blob([BOM + this.adjExport], { type: 'text/csv' })
-          navigator.msSaveBlob(csvData)
-        } else {
-          let csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + this.adjExport
-          // 非ie 浏览器
-          this.createDownLoadClick(csvContent, '邻接矩阵.csv')
-        }
-      } catch (err) {
-        alert(err)
-      }
-    },
-    //创建a标签下载
-    createDownLoadClick(content, fileName) {
-      const link = document.createElement('a')
-      link.href = encodeURI(content)
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    },
-    // 判断是否IE浏览器
-    MyBrowserIsIE() {
-      let isIE = false
-      if (navigator.userAgent.indexOf('compatible') > -1 && navigator.userAgent.indexOf('MSIE') > -1) {
-        // ie浏览器
-        isIE = true
-      }
-      if (navigator.userAgent.indexOf('Trident') > -1) {
-        // edge 浏览器
-        isIE = true
-      }
-      return isIE
+      EXPORT_CSV(this.adjExport, '邻接矩阵')
     }
   },
   mounted() {}
