@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <el-row>
         <el-card class="box-card mb15">
           <!-- 上传文件 btn-->
@@ -101,6 +101,7 @@ export default {
     return {
       firstMenu: '图神经网络',
       secondMenu: '聚类',
+      loading: false,
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
       clusterMax: {
@@ -142,6 +143,8 @@ export default {
     //   }
     //   console.log('uploadStatus', val)
     // },
+
+    // 生成肘部法则图 btn
     drawGraph() {
       this.$refs.clusterMax.validate(valid => {
         if (valid) {
@@ -150,6 +153,7 @@ export default {
         }
       })
     },
+    // k-means聚类 btn
     onCluster() {
       this.$refs.clusterMax.validate(valid => {
         if (valid) {
@@ -158,6 +162,7 @@ export default {
         }
       })
     },
+    // 画图
     getElbow() {
       if (this.myElbow) this.myElbow.dispose()
       // 初始化echarts实例
@@ -209,8 +214,9 @@ export default {
       // 绘制图表
       this.myElbow.setOption(option)
     },
-
+    //  接口获取 ElbowValue 同时 画图
     getElbowResult() {
+      this.loading = true
       const params = {
         maxK: this.clusterMax.maxK,
         fileNameMax: this.clusterMax.fileNameMax
@@ -218,6 +224,7 @@ export default {
       axios
         .post('http://localhost:3000/gnn/getElbowResult', params)
         .then(res => {
+          this.loading = false
           if (res.data.status) {
             this.ElbowValue = res.data.results
             this.getElbow()
@@ -226,11 +233,13 @@ export default {
           }
         })
         .catch(err => {
-          console.log(err)
+          this.loading = false
           this.$message.error(err.message)
         })
     },
+    // 接口 聚类
     getClusterResult() {
+      this.loading = true
       const params = {
         bestK: this.clusterBest.bestK,
         fileNameBest: this.clusterBest.fileNameBest
@@ -238,6 +247,7 @@ export default {
       axios
         .post('http://localhost:3000/gnn/getClusterResult', params)
         .then(res => {
+          this.loading = false
           if (res.data.status) {
             this.clusterValue = res.data.results
             this.clusterValueShow = res.data.results + ''
@@ -247,10 +257,11 @@ export default {
           }
         })
         .catch(err => {
-          console.log(err)
+          this.loading = false
           this.$message.error(err.message)
         })
     },
+    //  导出结果
     onExport() {
       if (this.clusterValue.length === 0) {
         this.$message.error('聚类结果为空，不能导出文件')

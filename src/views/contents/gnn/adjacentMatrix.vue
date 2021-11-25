@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <!-- 上传文件 + 构图 form -->
       <el-card class="mb15">
         <el-row :gutter="12" class="el_row_first">
@@ -81,6 +81,7 @@ export default {
     return {
       firstMenu: '图神经网络',
       secondMenu: '邻接矩阵',
+      loading: false,
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
       adjacentMatrix: null,
@@ -156,6 +157,7 @@ export default {
     getAdjacent() {
       this.$refs.wellScope.validate(valid => {
         if (valid) {
+          this.loading = true
           const params = {
             scopeVal: this.wellScope.scopeVal,
             fileName: this.wellScope.fileName
@@ -163,6 +165,7 @@ export default {
           axios
             .post('http://localhost:3000/gnn/getAdjacent', params)
             .then(res => {
+              this.loading = false
               if (res.data.status) {
                 this.adjacentMatrix = res.data.adjMatrix
                 this.graphData = res.data.wellName
@@ -178,6 +181,7 @@ export default {
               }
             })
             .catch(err => {
+              this.loading = false
               this.$message.error(err.message)
             })
         }

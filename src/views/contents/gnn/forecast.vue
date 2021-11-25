@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <!-- 上传文件 + 模型预测form -->
       <el-card class="mb15">
         <el-row :gutter="12" class="el_row_first mb15">
@@ -33,6 +33,7 @@
             <el-col :span="6">
               <el-form-item>
                 <el-button type="primary" @click="onPrediction">模型预测</el-button>
+                <el-button type="primary" @click="onVisual" plain>结果可视化</el-button>
               </el-form-item>
             </el-col>
           </el-row>
@@ -103,6 +104,7 @@ export default {
       secondMenu: '预测',
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
+      loading: false,
       modelPrediction: {
         adjFile: 'adj',
         timeFile: 'gasOutput',
@@ -132,12 +134,12 @@ export default {
     // 模型预测 btn
     onPrediction() {
       this.getPreResult()
-      // this.getPredictionPic()
     },
     // 模型预测 接口
     getPreResult() {
       this.$refs.modelPrediction.validate(valid => {
         if (valid) {
+          this.loading = true
           const params = {
             adjFile: this.modelPrediction.adjFile,
             timeFile: this.modelPrediction.timeFile,
@@ -146,6 +148,7 @@ export default {
           axios
             .post('http://localhost:3000/gnn/getPrediction', params)
             .then(res => {
+              this.loading = false
               if (res.data.status) {
                 this.preResultEvaluate = res.data.preEvaluate
                 this.preExport = res.data.preExport
@@ -155,6 +158,7 @@ export default {
               }
             })
             .catch(err => {
+              this.loading = false
               this.$message.error(err.message)
             })
         }
@@ -162,19 +166,28 @@ export default {
     },
     // 下载预测结果
     exportPredict() {
-      this.getPredictionPic()
       if (!this.preExport) {
         this.$message.error('暂无数据，请先模型预测！')
         return
       }
       EXPORT_CSV(this.preExport, '预测结果')
     },
+    // 结果可视化 btn
+    onVisual() {
+      if (!this.preResultEvaluate) {
+        this.$message.error('请先进行模型预测，再可视化！')
+        return
+      }
+      this.getPredictionPic()
+    },
     // 获取 预测结果图片
     getPredictionPic() {
+      this.loading = true
       // 获取 全部
       axios
         .get('http://localhost:3000/gnn/getTestAllImg')
         .then(res => {
+          this.loading = false
           if (res.data.status) {
             this.allImgBase64 = res.data.imgBase64
             this.allImgSrc = 'data:image/jpge;base64,' + this.allImgBase64
@@ -184,13 +197,16 @@ export default {
           }
         })
         .catch(err => {
+          this.loading = false
           this.$message.error(err.message)
         })
       // 获取 部分
+      // this.loading = true
       axios
         .get('http://localhost:3000/gnn/getTest90DayImg')
         .then(res => {
           if (res.data.status) {
+            this.loading = false
             this.partImgBase64 = res.data.imgBase64
             this.partImgSrc = 'data:image/jpge;base64,' + this.partImgBase64
             this.partImgShow = true
@@ -199,6 +215,7 @@ export default {
           }
         })
         .catch(err => {
+          this.loading = false
           this.$message.error(err.message)
         })
     }

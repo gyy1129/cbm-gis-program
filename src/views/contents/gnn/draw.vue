@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <el-card class="card-box" v-show="fromDisplay">
         <el-row :gutter="12">
           <el-col :span="3">
@@ -123,6 +123,7 @@ export default {
     return {
       firstMenu: '图神经网络',
       secondMenu: '构图',
+      loading: false,
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
       uploadDialog: false,
       fromDisplay: false,
@@ -180,12 +181,14 @@ export default {
     getWell() {
       this.$refs.displayWell.validate(valid => {
         if (valid) {
+          this.loading = true
           const params = {
             fileName: this.displayWell.fileName
           }
           axios
             .post('http://localhost:3000/gnn/displaywell', params)
             .then(res => {
+              this.loading = false
               if (res.data.status) {
                 this.pointsResults = res.data.results
                 this.pointsTotalResults = res.data.resultsCount
@@ -195,6 +198,7 @@ export default {
               }
             })
             .catch(err => {
+              this.loading = false
               this.$message.error(err.message)
             })
           this.disabledWell = false
@@ -215,6 +219,7 @@ export default {
     getConnect() {
       this.$refs.displayWell.validate(valid => {
         if (valid) {
+          this.loading = true
           const params = {
             scopeVal: this.wellScope.scopeVal,
             fileName: this.wellScope.fileName
@@ -222,6 +227,7 @@ export default {
           axios
             .post('http://localhost:3000/gnn/getConnect', params)
             .then(res => {
+              this.loading = false
               if (res.data.status) {
                 this.lineListResults = res.data.results
                 this.$message.success(res.data.message)
@@ -230,6 +236,7 @@ export default {
               }
             })
             .catch(err => {
+              this.loading = false
               this.$message.error(err.message)
             })
           this.disabledConnect = false
