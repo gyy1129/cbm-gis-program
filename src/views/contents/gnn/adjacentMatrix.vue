@@ -2,7 +2,8 @@
   <div class="content">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
     <div class="containter_main">
-      <el-card class="box-card mb22">
+      <!-- 上传文件 + 构图 form -->
+      <el-card class="mb15">
         <el-row :gutter="12" class="el_row_first">
           <el-col :span="3">
             <el-button type="primary" @click="uploadDialog = true">上传文件</el-button>
@@ -33,28 +34,28 @@
           </el-row>
         </el-form>
       </el-card>
-      <el-row :gutter="10">
-        <!-- 邻接矩阵 结果 -->
-        <el-col :span="10">
-          <el-card class="box_card mb22">
-            <el-button @click="exportAdjacent" class="mb22" type="primary" plain>下载生成结果</el-button>
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 20, maxRows: 20 }"
-              placeholder="等待生成结果..."
-              v-model="adjExport"
-              readonly
-              resize="none"
-            ></el-input>
-          </el-card>
-        </el-col>
-        <!-- 图谱 可视化 -->
-        <el-col :span="14">
-          <el-card class="box_card mb22">
-            <div id="graph" v-show="picShow"></div>
-            <el-empty description="暂无结果" class="empty" v-show="!picShow"></el-empty>
-          </el-card>
-        </el-col>
+      <!-- 邻接矩阵 结果 -->
+      <el-card class="mb15">
+        <el-row>
+          <el-button @click="exportAdjacent" class="mb15" type="primary" plain>下载生成结果</el-button>
+        </el-row>
+        <el-row>
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 10, maxRows: 15 }"
+            placeholder="等待生成结果..."
+            v-model="adjExport"
+            readonly
+            resize="none"
+          ></el-input>
+        </el-row>
+      </el-card>
+      <!-- 图谱 可视化 -->
+      <el-row style="padding-bottom: 25px; margin-bottom: 25px">
+        <el-card>
+          <div id="graph" v-show="picShow"></div>
+          <el-empty description="暂无结果" class="empty" v-show="!picShow"></el-empty>
+        </el-card>
       </el-row>
     </div>
     <el-dialog title="上传文件" :visible.sync="uploadDialog" center append-to-body>
@@ -97,7 +98,7 @@ export default {
         fileName: [{ required: true, message: '请输入上传文件名', trigger: 'blur' }]
       },
       lineList: [],
-      picShow: true,
+      picShow: false,
       myGraph: null,
       graphData: [],
       graphLink: []
@@ -110,6 +111,7 @@ export default {
         this.$message.error('请先生成邻接矩阵，再图谱可视化')
         return
       }
+      this.picShow = true
       if (this.myGraph) this.myGraph.dispose()
       this.myGraph = echarts.init(document.getElementById('graph'))
       const option = {
@@ -152,30 +154,34 @@ export default {
     },
     // 生成邻接矩阵
     getAdjacent() {
-      const params = {
-        scopeVal: this.wellScope.scopeVal,
-        fileName: this.wellScope.fileName
-      }
-      axios
-        .post('http://localhost:3000/gnn/getAdjacent', params)
-        .then(res => {
-          if (res.data.status) {
-            this.adjacentMatrix = res.data.adjMatrix
-            this.graphData = res.data.wellName
-            this.graphLink = res.data.wellPair
-            let rows = ''
-            this.adjacentMatrix.map(arr => {
-              rows = rows + arr + '\n'
-            })
-            this.adjExport = rows
-            this.$message.success(res.data.message)
-          } else {
-            this.$message.error(res.data.message)
+      this.$refs.wellScope.validate(valid => {
+        if (valid) {
+          const params = {
+            scopeVal: this.wellScope.scopeVal,
+            fileName: this.wellScope.fileName
           }
-        })
-        .catch(err => {
-          this.$message.error(err.message)
-        })
+          axios
+            .post('http://localhost:3000/gnn/getAdjacent', params)
+            .then(res => {
+              if (res.data.status) {
+                this.adjacentMatrix = res.data.adjMatrix
+                this.graphData = res.data.wellName
+                this.graphLink = res.data.wellPair
+                let rows = ''
+                this.adjacentMatrix.map(arr => {
+                  rows = rows + arr + '\n'
+                })
+                this.adjExport = rows
+                this.$message.success(res.data.message)
+              } else {
+                this.$message.error(res.data.message)
+              }
+            })
+            .catch(err => {
+              this.$message.error(err.message)
+            })
+        }
+      })
     },
     // 下载生成结果
     exportAdjacent() {
@@ -195,35 +201,21 @@ export default {
   top: 60px;
   left: 18px;
   width: 87%;
-  background-color: #fff;
   .el_row_first {
     display: flex;
     align-items: center;
     color: red;
   }
-  .mb22 {
-    margin-bottom: 22px;
+  .mb15 {
+    margin-bottom: 15px;
   }
   .well_scope {
     margin: 20px 0 0 0;
   }
-  .box_card {
-    #graph {
-      width: 600px;
-      height: 500px;
-      margin: 0 auto;
-    }
-    .empty {
-      width: 600px;
-      height: 500px;
-      margin: 0 auto;
-    }
-    /deep/.el-card__body {
-      width: 100%;
-      .el-textarea {
-        width: 90%;
-      }
-    }
+  #graph {
+    width: 1000px;
+    height: 700px;
+    margin: 0 auto;
   }
 }
 .explain {

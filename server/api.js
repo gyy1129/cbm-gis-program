@@ -388,6 +388,68 @@ const getAdjacent = async (request, response) => {
       .json({ status: true, adjMatrix: adj, wellPair: wellPair1, wellName: wellName1, message: '生成邻接矩阵成功！' })
   })
 }
+
+// 执行TGCN_min.py文件
+const getPrediction = async (request, response) => {
+  let adjFile = request.body.adjFile
+  let timeFile = request.body.timeFile
+  let trainTime = request.body.trainTime
+  console.log(request.body)
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  let exists = false
+  allFiles.find(item => {
+    let name = item.split('\\')[1]
+    if (name === adjFile + '.csv' || name === timeFile + '.csv') exists = true
+  })
+  if (!exists) {
+    response.status(200).json({ status: false, message: '该文件没有上传' })
+    return
+  }
+
+  // 异步执行
+  exec(
+    'python ./python/TGCN_min.py' + ' ' + adjFile + ' ' + timeFile + ' ' + trainTime + ' ',
+    function (error, stdout, stderr) {
+      if (error) {
+        console.info('stderr : ' + stderr)
+        response.status(200).json({ status: false, results: stderr })
+      }
+      // console.log('exec: ' + stdout)
+      fs.readFile('output/tgcn/test_result.csv', 'UTF-8', (err, data) => {
+        if (err) {
+          console.log(err)
+          response.status(200).json({ status: false, message: err.message })
+        }
+        // data = data.toString()
+        response.status(200).json({ status: true, preEvaluate: stdout, preExport: data, message: '预测结果生成！' })
+      })
+    }
+  )
+}
+
+//
+const getTestAllImg = async (request, response) => {
+  const path = __dirname + '/' + '/output/tgcn/test_all.jpg'
+  let imgBuffer = fs.readFileSync(path)
+  let imgBase64 = imgBuffer.toString('base64')
+  if (imgBase64) {
+    response.status(200).json({ status: true, imgBase64: imgBase64, message: '图片获取成功' })
+  } else {
+    response.status(200).json({ status: false, message: '图片获取失败' })
+  }
+}
+const getTest90DayImg = async (request, response) => {
+  const path = __dirname + '/' + '/output/tgcn/test_90day.jpg'
+  let imgBuffer = fs.readFileSync(path)
+  let imgBase64 = imgBuffer.toString('base64')
+  if (imgBase64) {
+    response.status(200).json({ status: true, imgBase64: imgBase64, message: '图片获取成功' })
+  } else {
+    response.status(200).json({ status: false, message: '图片获取失败' })
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -401,5 +463,8 @@ module.exports = {
   getClusterResult,
   displaywell,
   getConnect,
-  getAdjacent
+  getAdjacent,
+  getPrediction,
+  getTestAllImg,
+  getTest90DayImg
 }

@@ -3,7 +3,7 @@
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
     <div class="containter_main">
       <el-row>
-        <el-card class="box-card mb22">
+        <el-card class="box-card mb15">
           <!-- 上传文件 btn-->
           <el-row :gutter="12" class="el_row_first">
             <el-col :span="3">
@@ -57,18 +57,18 @@
       <el-row :gutter="10">
         <!-- 肘部法则图 -->
         <el-col :span="12">
-          <el-card class="box_card mb22">
+          <el-card class="box_card mb15">
             <div id="Elbow" v-show="picShow"></div>
             <el-empty description="暂无结果" class="empty" v-show="!picShow"></el-empty>
           </el-card>
         </el-col>
         <!-- 聚类结果 -->
         <el-col :span="12">
-          <el-card class="box_card mb22">
-            <el-button @click="onExport" class="mb22" type="primary" plain>导出结果</el-button>
+          <el-card class="box_card mb15">
+            <el-button @click="onExport" class="mb15" type="primary" plain>导出结果</el-button>
             <el-input
               type="textarea"
-              :autosize="{ minRows: 15, maxRows: 15 }"
+              :autosize="{ minRows: 16, maxRows: 16 }"
               placeholder="等待聚类结果..."
               v-model="clusterValueShow"
               readonly
@@ -272,14 +272,14 @@ export default {
   top: 60px;
   left: 18px;
   width: 87%;
-  background-color: #fff;
+  // background-color: #fff;
   .el_row_first {
     display: flex;
     align-items: center;
     color: red;
   }
-  .mb22 {
-    margin-bottom: 22px;
+  .mb15 {
+    margin-bottom: 15px;
   }
   .box_card {
     #Elbow {
@@ -291,12 +291,6 @@ export default {
       width: 600px;
       height: 400px;
       margin: 0 auto;
-    }
-    /deep/.el-card__body {
-      width: 100%;
-      .el-textarea {
-        width: 90%;
-      }
     }
   }
   .cluster_layout {

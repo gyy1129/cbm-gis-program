@@ -40,6 +40,7 @@ export default {
     position: relative;
     top: 0;
     height: 100%;
+    overflow-y: auto;
   }
 }
 </style>

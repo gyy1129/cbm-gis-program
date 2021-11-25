@@ -21,6 +21,9 @@ app.post('/gnn/getClusterResult', api.getClusterResult)
 app.post('/gnn/displaywell', api.displaywell)
 app.post('/gnn/getConnect', api.getConnect)
 app.post('/gnn/getAdjacent', api.getAdjacent)
+app.post('/gnn/getPrediction', api.getPrediction)
+app.get('/gnn/getTestAllImg', api.getTestAllImg)
+app.get('/gnn/getTest90DayImg', api.getTest90DayImg)
 
 app.listen(3000, err => {
   if (!err) {

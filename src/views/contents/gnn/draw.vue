@@ -178,24 +178,28 @@ export default {
     },
     // 获取井位置
     getWell() {
-      const params = {
-        fileName: this.displayWell.fileName
-      }
-      axios
-        .post('http://localhost:3000/gnn/displaywell', params)
-        .then(res => {
-          if (res.data.status) {
-            this.pointsResults = res.data.results
-            this.pointsTotalResults = res.data.resultsCount
-            this.$message.success(res.data.message)
-          } else {
-            this.$message.error(res.data.message)
+      this.$refs.displayWell.validate(valid => {
+        if (valid) {
+          const params = {
+            fileName: this.displayWell.fileName
           }
-        })
-        .catch(err => {
-          this.$message.error(err.message)
-        })
-      this.disabledWell = false
+          axios
+            .post('http://localhost:3000/gnn/displaywell', params)
+            .then(res => {
+              if (res.data.status) {
+                this.pointsResults = res.data.results
+                this.pointsTotalResults = res.data.resultsCount
+                this.$message.success(res.data.message)
+              } else {
+                this.$message.error(res.data.message)
+              }
+            })
+            .catch(err => {
+              this.$message.error(err.message)
+            })
+          this.disabledWell = false
+        }
+      })
     },
     // 切换井的显示
     changeWell(label) {
@@ -209,24 +213,28 @@ export default {
     },
     // 该范围内构图
     getConnect() {
-      const params = {
-        scopeVal: this.wellScope.scopeVal,
-        fileName: this.wellScope.fileName
-      }
-      axios
-        .post('http://localhost:3000/gnn/getConnect', params)
-        .then(res => {
-          if (res.data.status) {
-            this.lineListResults = res.data.results
-            this.$message.success(res.data.message)
-          } else {
-            this.$message.error(res.data.message)
+      this.$refs.displayWell.validate(valid => {
+        if (valid) {
+          const params = {
+            scopeVal: this.wellScope.scopeVal,
+            fileName: this.wellScope.fileName
           }
-        })
-        .catch(err => {
-          this.$message.error(err.message)
-        })
-      this.disabledConnect = false
+          axios
+            .post('http://localhost:3000/gnn/getConnect', params)
+            .then(res => {
+              if (res.data.status) {
+                this.lineListResults = res.data.results
+                this.$message.success(res.data.message)
+              } else {
+                this.$message.error(res.data.message)
+              }
+            })
+            .catch(err => {
+              this.$message.error(err.message)
+            })
+          this.disabledConnect = false
+        }
+      })
     },
     // 切换 连接
     changeConnect(label) {
