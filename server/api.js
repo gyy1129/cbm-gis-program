@@ -8,19 +8,26 @@ const { readFileList, repeat } = require('./tools')
 
 // 登录
 const login = async (request, response) => {
-  const q = `SELECT * FROM userinfo WHERE name = $1 AND password = $2`
+  const q1 = `SELECT * FROM userinfo WHERE name = $1`
+  const q2 = `SELECT * FROM userinfo WHERE name = $1 AND password = $2`
   try {
     let values = [request.body.username, request.body.password]
-    let res = await pool.query(q, values)
-    if (res.rowCount !== 0) {
-      response
-        .status(200)
-        .json({ status: true, message: '登录成功！', results: { id: res.rows[0].id, username: res.rows[0].name } })
+    let res1 = await pool.query(q1, [values[0]])
+    let res2 = await pool.query(q2, values)
+    if (res1.rowCount !== 0) {
+      if (res2.rowCount !== 0 && res2.rows[0].password === values[1]) {
+        response
+          .status(200)
+          .json({ status: true, message: '登录成功！', results: { id: res2.rows[0].id, username: res2.rows[0].name } })
+      } else {
+        response.status(400).json({ status: false, message: '账号密码错误！' })
+      }
     } else {
-      response.status(200).json({ status: false, message: '用户名或者密码出错！' })
+      response.status(404).json({ status: false, message: '账号不存在！' })
     }
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: '账号密码错误！' })
   }
 }
 
@@ -31,7 +38,7 @@ const register = async (request, response) => {
   try {
     let res1 = await pool.query(q1, [request.body.username])
     if (res1.rowCount !== 0) {
-      response.status(200).json({ status: false, message: '用户名已注册，请重新输入' })
+      response.status(400).json({ status: false, message: '用户名已注册，请重新输入' })
       return
     }
     await pool.query(q2, [request.body.username, request.body.password])
@@ -61,7 +68,7 @@ const cbmProperty = async (request, response) => {
     if (res.rowCount !== 0) {
       response.status(200).json({ status: true, results: res.rows, resultsCount: res.rowCount })
     } else {
-      response.status(200).json({ status: false, message: '暂无数据', results: res.rows })
+      response.status(404).json({ status: false, message: '暂无数据', results: res.rows })
     }
   } catch (err) {
     console.log(err.stack)
@@ -76,7 +83,7 @@ const cbmGas = async (request, response) => {
     if (res.rowCount !== 0) {
       response.status(200).json({ status: true, results: res.rows, resultsCount: res.rowCount })
     } else {
-      response.status(200).json({ status: false, message: '暂无数据', results: res.rows })
+      response.status(404).json({ status: false, message: '暂无数据', results: res.rows })
     }
   } catch (err) {
     console.log(err.stack)
@@ -101,7 +108,7 @@ const wellPosition = async (request, response) => {
       )
       response.status(200).json({ status: true, results: results, resultsCount: res.rowCount })
     } else {
-      response.status(200).json({ status: false, message: '暂无数据', results: res.rows })
+      response.status(404).json({ status: false, message: '暂无数据', results: res.rows })
     }
   } catch (err) {
     console.log(err.stack)
@@ -118,7 +125,7 @@ const python = async (request, response) => {
       console.info('stderr : ' + stderr)
     }
     // console.log('exec: ' + stdout)
-    // response.status(200).json({ exec: stdout })
+    // response.status(404).json({ exec: stdout })
   })
   // 同步执行
   const output = execSync('python test.py')
@@ -141,10 +148,10 @@ const uploadKmeans = async (req, res) => {
     let save_path = fields.path
 
     if (err) {
-      res.send({ status: false, message: '上传出现错误，上传失败！' })
+      res.status(500).json({ status: false, message: '上传出现错误，上传失败！' })
     } else {
       if (!files.file) {
-        res.send({ status: false, message: '上传失败' })
+        res.status(500).json({ status: false, message: '上传失败' })
       } else {
         //所有文件重命名，（因为不重名的话是随机文件名）
         files.file.forEach(file => {
@@ -162,11 +169,10 @@ const uploadKmeans = async (req, res) => {
     let allFiles = readFileList('./public')
     let exists = false
     exists = await repeat(exists, files, allFiles)
-
     if (exists) {
-      res.send({ status: false, message: '该文件名已经存在，请重新上传！' })
+      res.status(500).json({ status: false, message: '该文件名已经存在，请重新上传！' })
     } else {
-      res.send({ status: true, message: '上传成功' })
+      res.status(200).json({ status: true, message: '上传成功' })
     }
   })
 }
@@ -184,7 +190,7 @@ const getElbowResult = async (request, response) => {
     if (name === fileNameMax + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
 
@@ -192,7 +198,7 @@ const getElbowResult = async (request, response) => {
   exec('python ./python/KmeansElbow.py' + ' ' + maxK + ' ' + fileNameMax + ' ', function (error, stdout, stderr) {
     if (error) {
       console.info('stderr : ' + stderr)
-      response.status(200).json({ status: false, results: stderr })
+      response.status(404).json({ status: false, results: stderr })
     }
     console.log('exec: ' + stdout)
     let value = stdout.split('[')[1].split(']')[0].split(',')
@@ -218,7 +224,7 @@ const getClusterResult = async (request, response) => {
     if (name === fileNameBest + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
 
@@ -226,7 +232,7 @@ const getClusterResult = async (request, response) => {
   exec('python ./python/Kmeans.py' + ' ' + bestK + ' ' + fileNameBest + ' ', function (error, stdout, stderr) {
     if (error) {
       console.info('stderr : ' + stderr)
-      response.status(200).json({ status: false, results: stderr })
+      response.status(404).json({ status: false, results: stderr })
     }
     console.log('exec: ' + stdout)
     let value = stdout.split('[')[1].split(']')[0].split(',')
@@ -247,13 +253,13 @@ const displaywell = async (request, response) => {
     if (name === fileName + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
   fs.readFile('public/' + fileName + '.csv', 'UTF-8', (err, data) => {
     if (err) {
       console.log(err)
-      response.status(200).json({ status: false, message: err.message })
+      response.status(404).json({ status: false, message: err.message })
     }
     data = data.toString()
     let table = []
@@ -288,7 +294,7 @@ const getConnect = async (request, response) => {
     if (name === fileName + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
 
@@ -296,7 +302,7 @@ const getConnect = async (request, response) => {
   exec('python ./python/scope.py' + ' ' + scopeVal + ' ' + fileName + ' ', function (error, stdout, stderr) {
     if (error) {
       console.info('stderr : ' + stderr)
-      response.status(200).json({ status: false, results: stderr })
+      response.status(404).json({ status: false, results: stderr })
     }
     // console.log('exec: ' + stdout)
     let value = stdout.split('[').slice(2)
@@ -336,7 +342,7 @@ const getAdjacent = async (request, response) => {
     if (name === fileName + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
 
@@ -344,7 +350,7 @@ const getAdjacent = async (request, response) => {
   exec('python ./python/adjacentMatrix.py' + ' ' + scopeVal + ' ' + fileName + ' ', function (error, stdout, stderr) {
     if (error) {
       console.info('stderr : ' + stderr)
-      response.status(200).json({ status: false, results: stderr })
+      response.status(404).json({ status: false, results: stderr })
     }
     // console.log('exec: ' + stdout)
     let value = stdout.split('\r\n')
@@ -403,7 +409,7 @@ const getPrediction = async (request, response) => {
     if (name === adjFile + '.csv' || name === timeFile + '.csv') exists = true
   })
   if (!exists) {
-    response.status(200).json({ status: false, message: '该文件没有上传' })
+    response.status(404).json({ status: false, message: '该文件没有上传' })
     return
   }
 
@@ -413,13 +419,13 @@ const getPrediction = async (request, response) => {
     function (error, stdout, stderr) {
       if (error) {
         console.info('stderr : ' + stderr)
-        response.status(200).json({ status: false, results: stderr })
+        response.status(404).json({ status: false, results: stderr })
       }
       // console.log('exec: ' + stdout)
       fs.readFile('output/tgcn/test_result.csv', 'UTF-8', (err, data) => {
         if (err) {
           console.log(err)
-          response.status(200).json({ status: false, message: err.message })
+          response.status(404).json({ status: false, message: err.message })
         }
         // data = data.toString()
         response.status(200).json({ status: true, preEvaluate: stdout, preExport: data, message: '预测结果生成！' })
@@ -436,7 +442,7 @@ const getTestAllImg = async (request, response) => {
   if (imgBase64) {
     response.status(200).json({ status: true, imgBase64: imgBase64, message: '图片获取成功' })
   } else {
-    response.status(200).json({ status: false, message: '图片获取失败' })
+    response.status(404).json({ status: false, message: '图片获取失败' })
   }
 }
 const getTest90DayImg = async (request, response) => {
@@ -446,7 +452,7 @@ const getTest90DayImg = async (request, response) => {
   if (imgBase64) {
     response.status(200).json({ status: true, imgBase64: imgBase64, message: '图片获取成功' })
   } else {
-    response.status(200).json({ status: false, message: '图片获取失败' })
+    response.status(404).json({ status: false, message: '图片获取失败' })
   }
 }
 

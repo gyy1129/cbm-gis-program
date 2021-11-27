@@ -49,6 +49,7 @@ export default {
           axios
             .post('http://localhost:3000/login', params)
             .then(res => {
+              console.log(res)
               if (res.data.status) {
                 //设置Vuex登录标志为true，默认userLogin为false
                 this.$store.dispatch('userLogin', true)
@@ -65,7 +66,7 @@ export default {
               }
             })
             .catch(err => {
-              this.$message.error(err.message)
+              this.$message.error(err.response.data.message)
             })
         } else {
           return false

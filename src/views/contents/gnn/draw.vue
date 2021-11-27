@@ -199,7 +199,7 @@ export default {
             })
             .catch(err => {
               this.loading = false
-              this.$message.error(err.message)
+              this.$message.error(err.response.data.message)
             })
           this.disabledWell = false
         }
@@ -237,7 +237,7 @@ export default {
             })
             .catch(err => {
               this.loading = false
-              this.$message.error(err.message)
+              this.$message.error(err.response.data.message)
             })
           this.disabledConnect = false
         }

@@ -159,7 +159,7 @@ export default {
             })
             .catch(err => {
               this.loading = false
-              this.$message.error(err.message)
+              this.$message.error(err.response.data.message)
             })
         }
       })
@@ -198,7 +198,7 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          this.$message.error(err.message)
+          this.$message.error(err.response.data.message)
         })
       // 获取 部分
       // this.loading = true
@@ -216,7 +216,7 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          this.$message.error(err.message)
+          this.$message.error(err.response.data.message)
         })
     }
   },

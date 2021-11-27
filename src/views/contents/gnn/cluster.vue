@@ -234,7 +234,7 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          this.$message.error(err.message)
+          this.$message.error(err.response.data.message)
         })
     },
     // 接口 聚类
@@ -258,7 +258,7 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          this.$message.error(err.message)
+          this.$message.error(err.response.data.message)
         })
     },
     //  导出结果

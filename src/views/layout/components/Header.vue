@@ -58,7 +58,7 @@ export default {
           }
         })
         .catch(err => {
-          this.$message.error(err.message)
+          this.$message.error(err.response.data.message)
         })
     }
   },

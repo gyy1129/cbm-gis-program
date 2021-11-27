@@ -23,8 +23,10 @@ function repeat(exists, files, allFiles) {
       let name = item.split('\\')[1]
       if (name === file.originalFilename) {
         exists = true
+        return exists
       } else {
         exists = false
+        return exists
       }
     })
   })
