@@ -13,7 +13,6 @@
 </template>
 
 <script>
-// import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/zh-cn'
 import { getUserInfo } from '@/request/api'

@@ -4,11 +4,10 @@ export const login = p => post('/login', p)
 export const register = p => post('/register', p)
 export const getUserInfo = p => post('/getUserInfo', p)
 
-export const cbmProperty = p => post('/data/cbmProperty', p)
-export const cbmGas = p => post('/data/cbmGas', p)
-export const wellPosition = p => post('/data/wellPosition', p)
+export const cbmProperty = () => get('/data/cbmProperty')
+export const cbmGas = () => get('/data/cbmGas')
+export const wellPosition = () => get('/data/wellPosition')
 
-export const python = () => get('/python')
 export const uploadKmeans = p => post('/gnn/uploadKmeans', p) // 之前没加gnn
 export const getElbowResult = p => post('/gnn/getElbowResult', p)
 export const getClusterResult = p => post('/gnn/getClusterResult', p)

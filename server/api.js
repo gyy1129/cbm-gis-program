@@ -123,25 +123,6 @@ const wellPosition = async (request, response) => {
     console.log(err.stack)
   }
 }
-//  python 测试
-// eslint-disable-next-line no-unused-vars
-const python = async (request, response) => {
-  const exec = require('child_process').exec
-  const execSync = require('child_process').execSync
-  // 异步执行
-  exec('python test.py', function (error, stdout, stderr) {
-    if (error) {
-      console.info('stderr : ' + stderr)
-    }
-    // console.log('exec: ' + stdout)
-    // response.status(404).json({ exec: stdout })
-  })
-  // 同步执行
-  const output = execSync('python test.py')
-  // console.log('sync: ' + output.toString())
-  // console.log('over')
-  response.status(200).json({ sync: output.toString() })
-}
 
 //  上传文件
 const uploadKmeans = async (req, res) => {
@@ -214,12 +195,8 @@ const getElbowResult = async (request, response) => {
     let result = value.map(item => Number(item))
     response.status(200).json({ status: true, results: result })
   })
-  // 同步执行
-  // const output = execSync('python test.py')
-  // // console.log('sync: ' + output.toString())
-  // // console.log('over')
-  // response.status(200).json({ sync: output.toString() })
 }
+
 // 执行KmeansElbow.py文件
 const getClusterResult = async (request, response) => {
   let bestK = request.body.bestK
@@ -454,6 +431,7 @@ const getTestAllImg = async (request, response) => {
     response.status(404).json({ status: false, message: '图片获取失败' })
   }
 }
+
 // 获取test_90day.jpg图片转为base64
 const getTest90DayImg = async (request, response) => {
   const path = __dirname + '/' + '/output/tgcn/test_90day.jpg'
@@ -470,10 +448,11 @@ module.exports = {
   login,
   register,
   getUserInfo,
+
   cbmProperty,
   cbmGas,
   wellPosition,
-  python,
+
   uploadKmeans,
   getElbowResult,
   getClusterResult,

@@ -13,7 +13,7 @@ app.use(function (req, res, next) {
   if (req.url != '/login' && req.url != '/register') {
     let token = req.headers.authorization
     // let token = req.headers.authorization.replace('Bearer ', '') // postman token测试
-    console.log('token:', token)
+    // console.log('token:', token)
     let jwt = new JwtUtil(token)
     let result = jwt.verifyToken()
     // 如果考验通过就next，否则就返回登陆信息不正确
@@ -30,11 +30,11 @@ app.use(function (req, res, next) {
 app.post('/login', api.login)
 app.post('/register', api.register)
 app.post('/getUserInfo', api.getUserInfo)
-app.post('/data/cbmproperty', api.cbmProperty)
-app.post('/data/cbmgas', api.cbmGas)
-app.post('/data/wellposition', api.wellPosition)
 
-app.get('/python', api.python)
+app.get('/data/cbmProperty', api.cbmProperty)
+app.get('/data/cbmGas', api.cbmGas)
+app.get('/data/wellPosition', api.wellPosition)
+
 app.post('/uploadKmeans', api.uploadKmeans)
 app.post('/gnn/getElbowResult', api.getElbowResult)
 app.post('/gnn/getClusterResult', api.getClusterResult)

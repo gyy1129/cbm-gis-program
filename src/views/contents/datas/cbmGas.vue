@@ -88,9 +88,9 @@
 </template>
 
 <script>
-import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 import { EXPORT_ALL } from '@/utils/index'
+import { cbmGas } from '@/request/api'
 export default {
   name: 'cbmGas',
   components: { Tabs },
@@ -185,18 +185,17 @@ export default {
       this.paginationOptions.currentPage = val
     },
     getList() {
-      axios
-        .post('http://localhost:3000/data/cbmgas')
+      cbmGas()
         .then(res => {
-          if (res.data.status) {
-            this.tableData = res.data.results
-            this.total = res.data.resultsCount
+          if (res.status) {
+            this.tableData = res.results
+            this.total = res.resultsCount
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
         .catch(err => {
-          this.$message.error(err.response.data.message)
+          this.$message.error(err.message)
         })
     }
   }

@@ -47,9 +47,9 @@
 
 <script>
 import Tabs from '../components/Tabs.vue'
-import axios from 'axios'
 import { BmlMarkerClusterer } from 'vue-baidu-map'
 import { cloneDeep } from 'lodash'
+import { wellPosition } from '@/request/api'
 
 export default {
   name: 'gisData',
@@ -128,18 +128,17 @@ export default {
       }
     },
     getPosition() {
-      axios
-        .post('http://localhost:3000/data/wellposition')
+      wellPosition()
         .then(res => {
-          if (res.data.status) {
-            this.points = res.data.results
-            this.pointsTotal = res.data.resultsCount
+          if (res.status) {
+            this.points = res.results
+            this.pointsTotal = res.resultsCount
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
         .catch(err => {
-          this.$message.error(err.response.data.message)
+          this.$message.error(err.message)
         })
     }
   },
