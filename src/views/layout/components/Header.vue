@@ -13,9 +13,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/zh-cn'
+import { getUserInfo } from '@/request/api'
+
 export default {
   name: 'Header',
   components: {},
@@ -50,15 +52,14 @@ export default {
     },
     getUserInfo() {
       const params = { id: this.userInfo.id }
-      axios
-        .post('http://localhost:3000/getUserInfo', params)
+      getUserInfo(params)
         .then(res => {
-          if (res.data.status) {
-            this.userInfo.username = res.data.username
+          if (res.status) {
+            this.userInfo.username = res.username
           }
         })
         .catch(err => {
-          this.$message.error(err.response.data.message)
+          this.$message.error(err.message)
         })
     }
   },
@@ -69,11 +70,6 @@ export default {
       this.getUserInfo()
     }
   }
-  // created() {
-  //   setInterval(() => {
-  //     this.getCurDate()
-  //   }, 1000)
-  // }
 }
 </script>
 <style lang="less" scoped>

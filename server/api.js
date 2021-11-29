@@ -5,6 +5,7 @@ const multiparty = require('multiparty')
 const exec = require('child_process').exec
 // const execSync = require('child_process').execSync
 const { readFileList, repeat } = require('./tools')
+const JwtUtil = require('./jwt') // 引入jwt token工具
 
 // 登录
 const login = async (request, response) => {
@@ -16,9 +17,17 @@ const login = async (request, response) => {
     let res2 = await pool.query(q2, values)
     if (res1.rowCount !== 0) {
       if (res2.rowCount !== 0 && res2.rows[0].password === values[1]) {
-        response
-          .status(200)
-          .json({ status: true, message: '登录成功！', results: { id: res2.rows[0].id, username: res2.rows[0].name } })
+        // 登陆成功，添加token验证
+        let user = { id: res2.rows[0].id, name: res2.rows[0].name }
+        // 将用户传入并生成token
+        let jwt = new JwtUtil(user)
+        let token = jwt.generateToken()
+        response.status(200).json({
+          status: true,
+          message: '登录成功！',
+          token: token,
+          results: { id: res2.rows[0].id, username: res2.rows[0].name }
+        })
       } else {
         response.status(400).json({ status: false, message: '账号密码错误！' })
       }
@@ -434,7 +443,7 @@ const getPrediction = async (request, response) => {
   )
 }
 
-//
+// 获取test_all.jpg图片转为base64
 const getTestAllImg = async (request, response) => {
   const path = __dirname + '/' + '/output/tgcn/test_all.jpg'
   let imgBuffer = fs.readFileSync(path)
@@ -445,6 +454,7 @@ const getTestAllImg = async (request, response) => {
     response.status(404).json({ status: false, message: '图片获取失败' })
   }
 }
+// 获取test_90day.jpg图片转为base64
 const getTest90DayImg = async (request, response) => {
   const path = __dirname + '/' + '/output/tgcn/test_90day.jpg'
   let imgBuffer = fs.readFileSync(path)

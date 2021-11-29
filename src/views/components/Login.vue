@@ -51,6 +51,10 @@ export default {
             .then(res => {
               console.log(res)
               if (res.data.status) {
+                //使用vuex对全局token进行状态管理
+                this.$store.dispatch('set_token', res.data.token)
+                localStorage.setItem('token', res.data.token)
+
                 //设置Vuex登录标志为true，默认userLogin为false
                 this.$store.dispatch('userLogin', true)
                 //Vuex在用户刷新的时候userLogin会回到默认值false，所以我们需要用到HTML5储存
@@ -66,7 +70,7 @@ export default {
               }
             })
             .catch(err => {
-              this.$message.error(err.response.data.message)
+              this.$message.error(err.message)
             })
         } else {
           return false
