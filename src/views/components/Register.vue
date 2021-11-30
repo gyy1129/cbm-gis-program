@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { register } from '@/request/api'
 import Background from './background.vue'
 export default {
   name: 'Register',
@@ -58,32 +58,23 @@ export default {
       this.$refs.registerForm.validate(valid => {
         if (valid) {
           const params = { username, password }
-          axios
-            .post('http://localhost:3000/register', params)
-            .then(res => {
-              if (!res.data.status) {
-                this.$message.error(res.data.message)
-              }
-              if (res.data.status) {
-                console.log(res)
-                this.$confirm('是否去登录？', '提示', {
-                  confirmButtonText: '去登录',
-                  cancelButtonText: '取消'
+          register(params).then(res => {
+            if (res.status) {
+              this.$message.success(res.message)
+              this.$confirm('是否去登录？', '提示', {
+                confirmButtonText: '去登录',
+                cancelButtonText: '取消'
+              })
+                .then(() => {
+                  this.$router.push({ path: '/login' })
                 })
-                  .then(() => {
-                    this.$router.push({ path: '/login' })
-                  })
-                  .catch(() => {
-                    this.$message.info('已取消')
-                  })
-              }
-            })
-            .catch(() => {
-              this.$message.error('注册失败')
-            })
-        } else {
-          console.log('error submit!')
-          return false
+                .catch(() => {
+                  this.$message.info('已取消')
+                })
+            } else {
+              this.$message.error(res.message)
+            }
+          })
         }
       })
     },

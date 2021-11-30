@@ -29,7 +29,7 @@ if (process.env.NODE_ENV == 'development') {
 } else if (process.env.NODE_ENV == 'debug') {
   axios.defaults.baseURL = ''
 } else if (process.env.NODE_ENV == 'production') {
-  axios.defaults.baseURL = 'http://api.123dailu.com/'
+  axios.defaults.baseURL = 'http://api.123.com/'
 }
 
 axios.defaults.timeout = 1000 * 60 * 3 // 请求超时时间
@@ -43,6 +43,7 @@ axios.interceptors.request.use(
     // const token = store.state.token
     // token && (config.headers.Authorization = token)
     const token = localStorage.getItem('token')
+    store.dispatch('set_token', token)
     if (token) {
       config.headers.Authorization = token
     }

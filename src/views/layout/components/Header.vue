@@ -43,6 +43,7 @@ export default {
         .then(() => {
           localStorage.removeItem('Flag')
           localStorage.removeItem('UserInfo')
+          this.$store.dispatch('userLogin', false)
           this.$router.push('/login')
         })
         .catch(() => {

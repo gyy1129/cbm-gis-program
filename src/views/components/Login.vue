@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { login } from '@/request/api'
 import Background from './background.vue'
 export default {
   name: 'Login',
@@ -46,27 +46,26 @@ export default {
             username: this.loginForm.username,
             password: this.loginForm.password
           }
-          axios
-            .post('http://localhost:3000/login', params)
+          login(params)
             .then(res => {
               console.log(res)
-              if (res.data.status) {
+              if (res.status) {
                 //使用vuex对全局token进行状态管理
-                this.$store.dispatch('set_token', res.data.token)
-                localStorage.setItem('token', res.data.token)
+                this.$store.dispatch('set_token', res.token)
+                localStorage.setItem('token', res.token)
 
                 //设置Vuex登录标志为true，默认userLogin为false
                 this.$store.dispatch('userLogin', true)
                 //Vuex在用户刷新的时候userLogin会回到默认值false，所以我们需要用到HTML5储存
                 //我们设置一个名为Flag，值为isLogin的字段，作用是如果Flag有值且为isLogin的时候，证明用户已经登录了。
                 localStorage.setItem('Flag', 'isLogin')
-                this.$message.success(res.data.message)
+                this.$message.success(res.message)
 
-                const { id, username } = res.data.results
+                const { id, username } = res.results
                 localStorage.setItem('UserInfo', JSON.stringify({ id: id, username: username }))
                 this.$router.push({ path: '/home' })
               } else {
-                this.$message.error(res.data.message)
+                this.$message.error(res.message)
               }
             })
             .catch(err => {

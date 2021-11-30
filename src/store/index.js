@@ -21,7 +21,6 @@ const store = new Vuex.Store({
       state.isLogin = flag
     },
     set_token(state, ltoken) {
-      //第一个参数是拿到state对象
       // localStorage.setItem('token', ltoken)
       state.token = ltoken
     },
@@ -32,8 +31,8 @@ const store = new Vuex.Store({
   },
   // 应用mutations
   actions: {
-    userLogin({ commit }, flag) {
-      commit('userStatus', flag)
+    userLogin(context, flag) {
+      context.commit('userStatus', flag)
     },
     set_token(context, token) {
       context.commit('set_token', token)
