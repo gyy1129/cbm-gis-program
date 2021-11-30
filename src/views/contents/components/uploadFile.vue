@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { uploadKmeans } from '@/request/api'
 export default {
   props: {
     //设置文件保存的路径，作为参数传递进来
@@ -30,7 +30,6 @@ export default {
     return {
       fileList: [],
       flagCSV: true
-      // uploadStatus: null
     }
   },
   methods: {
@@ -45,7 +44,7 @@ export default {
       this.fileList.splice(this.fileList.indexOf(file.raw), 1)
     },
     //上传文件
-    async submitUpload() {
+    submitUpload() {
       console.log('提交文件')
       let formData = new FormData()
       // 向 formData 对象中添加文件
@@ -61,10 +60,10 @@ export default {
       }
       // 判断是否为csv文件
       this.judgeCSV()
+      console.log(formData)
       if (this.flagCSV) {
-        this.uploadKmeans(formData)
+        this.onUploadKmeans(formData)
       }
-      // await this.$emit('uploadStatus', this.uploadStatus)
     },
     judgeCSV() {
       this.fileList.map(file => {
@@ -75,22 +74,17 @@ export default {
         }
       })
     },
-    uploadKmeans(formData) {
-      axios
-        .post('http://localhost:3000/uploadKmeans', formData)
-        .then(res => {
-          if (res.data.status) {
-            this.uploadStatus = true
-            // 爱你 高云云
-            this.$message.success(res.data.message)
-          } else {
-            this.uploadStatus = false
-            this.$message.error(res.data.message)
-          }
-        })
-        .catch(err => {
-          this.$message.error(err.data.message)
-        })
+    onUploadKmeans(formData) {
+      uploadKmeans(formData).then(res => {
+        if (res.status) {
+          this.uploadStatus = true
+          // 爱你 高云云
+          this.$message.success(res.message)
+        } else {
+          this.uploadStatus = false
+          this.$message.error(res.message)
+        }
+      })
     }
   },
   mounted() {}

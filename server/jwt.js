@@ -16,7 +16,7 @@ class Jwt {
     let token = jwt.sign(
       {
         data,
-        exp: created + 60 * 30
+        exp: created + 60 * 60 * 24 * 3
       },
       PRIVATE_KEY,
       { algorithm: 'RS256' }

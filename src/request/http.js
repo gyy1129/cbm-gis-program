@@ -1,5 +1,4 @@
 import axios from 'axios'
-import QS from 'qs'
 import router from '../router/index'
 import store from '../store/index'
 import { Message } from 'element-ui'
@@ -9,7 +8,7 @@ const tip = msg => {
   Message({
     message: msg,
     type: 'error',
-    duration: 1000,
+    duration: 2000,
     showClose: true
   })
 }
@@ -122,7 +121,7 @@ export function get(url, params) {
 export function post(url, params) {
   return new Promise((resolve, reject) => {
     axios
-      .post(url, QS.stringify(params))
+      .post(url, params)
       .then(res => {
         resolve(res.data)
       })

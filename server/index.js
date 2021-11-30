@@ -35,7 +35,7 @@ app.get('/data/cbmProperty', api.cbmProperty)
 app.get('/data/cbmGas', api.cbmGas)
 app.get('/data/wellPosition', api.wellPosition)
 
-app.post('/uploadKmeans', api.uploadKmeans)
+app.post('/gnn/uploadKmeans', api.uploadKmeans)
 app.post('/gnn/getElbowResult', api.getElbowResult)
 app.post('/gnn/getClusterResult', api.getClusterResult)
 app.post('/gnn/displaywell', api.displaywell)
