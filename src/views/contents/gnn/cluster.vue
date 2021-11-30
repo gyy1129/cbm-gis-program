@@ -90,10 +90,10 @@
 
 <script>
 import * as echarts from 'echarts'
-import axios from 'axios'
 import { EXPORT_ALL } from '@/utils/index'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
+import { getElbowResult, getClusterResult } from '@/request/api'
 export default {
   name: 'gisData',
   components: { Tabs, uploadFile },
@@ -137,13 +137,6 @@ export default {
   },
   computed: {},
   methods: {
-    // uploadStatus(val) {
-    //   if (val) {
-    //     this.uploadDialog = false
-    //   }
-    //   console.log('uploadStatus', val)
-    // },
-
     // 生成肘部法则图 btn
     drawGraph() {
       this.$refs.clusterMax.validate(valid => {
@@ -221,20 +214,18 @@ export default {
         maxK: this.clusterMax.maxK,
         fileNameMax: this.clusterMax.fileNameMax
       }
-      axios
-        .post('http://localhost:3000/gnn/getElbowResult', params)
+      getElbowResult(params)
         .then(res => {
           this.loading = false
-          if (res.data.status) {
-            this.ElbowValue = res.data.results
+          if (res.status) {
+            this.ElbowValue = res.results
             this.getElbow()
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
-          this.$message.error(err.response.data.message)
         })
     },
     // 接口 聚类
@@ -244,21 +235,19 @@ export default {
         bestK: this.clusterBest.bestK,
         fileNameBest: this.clusterBest.fileNameBest
       }
-      axios
-        .post('http://localhost:3000/gnn/getClusterResult', params)
+      getClusterResult(params)
         .then(res => {
           this.loading = false
-          if (res.data.status) {
-            this.clusterValue = res.data.results
-            this.clusterValueShow = res.data.results + ''
+          if (res.status) {
+            this.clusterValue = res.results
+            this.clusterValueShow = res.results + ''
             console.log(this.clusterValue)
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
-          this.$message.error(err.response.data.message)
         })
     },
     //  导出结果

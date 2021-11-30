@@ -112,10 +112,10 @@
 </template>
 
 <script>
-import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
 import { BmlMarkerClusterer } from 'vue-baidu-map'
+import { displaywell, getConnect } from '@/request/api'
 export default {
   name: 'draw',
   components: { Tabs, uploadFile, BmlMarkerClusterer },
@@ -185,23 +185,21 @@ export default {
           const params = {
             fileName: this.displayWell.fileName
           }
-          axios
-            .post('http://localhost:3000/gnn/displaywell', params)
+          displaywell(params)
             .then(res => {
               this.loading = false
-              if (res.data.status) {
-                this.pointsResults = res.data.results
-                this.pointsTotalResults = res.data.resultsCount
-                this.$message.success(res.data.message)
+              if (res.status) {
+                this.pointsResults = res.results
+                this.pointsTotalResults = res.resultsCount
+                this.disabledWell = false
+                this.$message.success(res.message)
               } else {
-                this.$message.error(res.data.message)
+                this.$message.error(res.message)
               }
             })
-            .catch(err => {
+            .catch(() => {
               this.loading = false
-              this.$message.error(err.response.data.message)
             })
-          this.disabledWell = false
         }
       })
     },
@@ -224,22 +222,20 @@ export default {
             scopeVal: this.wellScope.scopeVal,
             fileName: this.wellScope.fileName
           }
-          axios
-            .post('http://localhost:3000/gnn/getConnect', params)
+          getConnect(params)
             .then(res => {
               this.loading = false
-              if (res.data.status) {
-                this.lineListResults = res.data.results
-                this.$message.success(res.data.message)
+              if (res.status) {
+                this.lineListResults = res.results
+                this.disabledConnect = false
+                this.$message.success(res.message)
               } else {
-                this.$message.error(res.data.message)
+                this.$message.error(res.message)
               }
             })
-            .catch(err => {
+            .catch(() => {
               this.loading = false
-              this.$message.error(err.response.data.message)
             })
-          this.disabledConnect = false
         }
       })
     },

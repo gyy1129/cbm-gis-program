@@ -91,10 +91,10 @@
 </template>
 
 <script>
-import axios from 'axios'
 import uploadFile from '../components/uploadFile.vue'
 import Tabs from '../components/Tabs.vue'
 import { EXPORT_CSV } from '@/utils/index'
+import { getPrediction, getTestAllImg, getTest90DayImg } from '@/request/api'
 export default {
   name: 'forecast',
   components: { Tabs, uploadFile },
@@ -145,21 +145,19 @@ export default {
             timeFile: this.modelPrediction.timeFile,
             trainTime: this.modelPrediction.trainTime
           }
-          axios
-            .post('http://localhost:3000/gnn/getPrediction', params)
+          getPrediction(params)
             .then(res => {
               this.loading = false
-              if (res.data.status) {
-                this.preResultEvaluate = res.data.preEvaluate
-                this.preExport = res.data.preExport
-                this.$message.success(res.data.message)
+              if (res.status) {
+                this.preResultEvaluate = res.preEvaluate
+                this.preExport = res.preExport
+                this.$message.success(res.message)
               } else {
-                this.$message.error(res.data.message)
+                this.$message.error(res.message)
               }
             })
-            .catch(err => {
+            .catch(() => {
               this.loading = false
-              this.$message.error(err.response.data.message)
             })
         }
       })
@@ -184,39 +182,35 @@ export default {
     getPredictionPic() {
       this.loading = true
       // 获取 全部
-      axios
-        .get('http://localhost:3000/gnn/getTestAllImg')
+      getTestAllImg()
         .then(res => {
           this.loading = false
-          if (res.data.status) {
-            this.allImgBase64 = res.data.imgBase64
+          if (res.status) {
+            this.allImgBase64 = res.imgBase64
             this.allImgSrc = 'data:image/jpge;base64,' + this.allImgBase64
             this.allImgShow = true
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
-          this.$message.error(err.response.data.message)
         })
       // 获取 部分
       // this.loading = true
-      axios
-        .get('http://localhost:3000/gnn/getTest90DayImg')
+      getTest90DayImg()
         .then(res => {
-          if (res.data.status) {
+          if (res.status) {
             this.loading = false
-            this.partImgBase64 = res.data.imgBase64
+            this.partImgBase64 = res.imgBase64
             this.partImgSrc = 'data:image/jpge;base64,' + this.partImgBase64
             this.partImgShow = true
           } else {
-            this.$message.error(res.data.message)
+            this.$message.error(res.message)
           }
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
-          this.$message.error(err.response.data.message)
         })
     }
   },

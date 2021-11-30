@@ -84,7 +84,7 @@ const cbmProperty = async (request, response) => {
   }
 }
 
-//  获取 煤层气属性数据
+//  获取 煤层气时间序列
 const cbmGas = async (request, response) => {
   const q = `SELECT * FROM cbmgas`
   try {
@@ -171,7 +171,6 @@ const uploadKmeans = async (req, res) => {
 const getElbowResult = async (request, response) => {
   let maxK = request.body.maxK
   let fileNameMax = request.body.fileNameMax
-  console.log(request.body)
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
   let exists = false
@@ -197,7 +196,7 @@ const getElbowResult = async (request, response) => {
   })
 }
 
-// 执行KmeansElbow.py文件
+// 执行Kmeans.py文件
 const getClusterResult = async (request, response) => {
   let bestK = request.body.bestK
   let fileNameBest = request.body.fileNameBest
@@ -262,7 +261,6 @@ const displaywell = async (request, response) => {
       point.baidu_lat = item[4]
       points.push(point)
     })
-    // console.log(points)
     response.status(200).json({ status: true, results: points, resultsCount: points.length, message: '读取文件成功！' })
   })
 }

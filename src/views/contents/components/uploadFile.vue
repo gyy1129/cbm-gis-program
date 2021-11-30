@@ -1,5 +1,5 @@
 <template>
-  <div class="containter">
+  <div class="containter" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
     <el-upload
       :action="'none'"
       :auto-upload="false"
@@ -29,7 +29,8 @@ export default {
   data() {
     return {
       fileList: [],
-      flagCSV: true
+      flagCSV: true,
+      loading: false
     }
   },
   methods: {
@@ -45,7 +46,6 @@ export default {
     },
     //上传文件
     submitUpload() {
-      console.log('提交文件')
       let formData = new FormData()
       // 向 formData 对象中添加文件
       this.fileList.forEach(file => {
@@ -60,7 +60,6 @@ export default {
       }
       // 判断是否为csv文件
       this.judgeCSV()
-      console.log(formData)
       if (this.flagCSV) {
         this.onUploadKmeans(formData)
       }
@@ -75,16 +74,21 @@ export default {
       })
     },
     onUploadKmeans(formData) {
-      uploadKmeans(formData).then(res => {
-        if (res.status) {
-          this.uploadStatus = true
-          // 爱你 高云云
-          this.$message.success(res.message)
-        } else {
-          this.uploadStatus = false
-          this.$message.error(res.message)
-        }
-      })
+      this.loading = true
+      uploadKmeans(formData)
+        .then(res => {
+          this.loading = false
+          if (res.status) {
+            this.uploadStatus = true
+            this.$message.success(res.message)
+          } else {
+            this.uploadStatus = false
+            this.$message.error(res.message)
+          }
+        })
+        .catch(() => {
+          this.loading = false
+        })
     }
   },
   mounted() {}

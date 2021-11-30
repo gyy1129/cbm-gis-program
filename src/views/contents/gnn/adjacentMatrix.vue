@@ -53,8 +53,9 @@
       <!-- 图谱 可视化 -->
       <el-row style="padding-bottom: 25px; margin-bottom: 25px">
         <el-card>
-          <div id="graph" v-show="picShow"></div>
-          <el-empty description="暂无结果" class="empty" v-show="!picShow"></el-empty>
+          <div id="graph">
+            <el-empty description="暂无结果" class="empty" v-show="emptyShow"></el-empty>
+          </div>
         </el-card>
       </el-row>
     </div>
@@ -70,10 +71,10 @@
 
 <script>
 import * as echarts from 'echarts'
-import axios from 'axios'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
 import { EXPORT_CSV } from '@/utils/index'
+import { getAdjacent } from '@/request/api'
 export default {
   name: 'adjacentMatrix',
   components: { Tabs, uploadFile },
@@ -99,7 +100,7 @@ export default {
         fileName: [{ required: true, message: '请输入上传文件名', trigger: 'blur' }]
       },
       lineList: [],
-      picShow: false,
+      emptyShow: true,
       myGraph: null,
       graphData: [],
       graphLink: []
@@ -112,7 +113,11 @@ export default {
         this.$message.error('请先生成邻接矩阵，再图谱可视化')
         return
       }
-      this.picShow = true
+      this.emptyShow = false
+      this.drawGraph()
+    },
+    // 绘制图谱
+    drawGraph() {
       if (this.myGraph) this.myGraph.dispose()
       this.myGraph = echarts.init(document.getElementById('graph'))
       const option = {
@@ -133,8 +138,8 @@ export default {
             symbolSize: 30, // 调整节点的大小
             roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
             draggable: true, //指示节点是否可以拖动
-            focusNodeAdjacency: true, //当鼠标移动到节点上，突出显示节点以及节点的边和邻接节点
-            // focus: 'adjacency',
+            // focusNodeAdjacency: true, //当鼠标移动到节点上，突出显示节点以及节点的边和邻接节点 (警告 被弃用)
+            focus: 'adjacency',
             label: {
               show: true
             },
@@ -162,27 +167,25 @@ export default {
             scopeVal: this.wellScope.scopeVal,
             fileName: this.wellScope.fileName
           }
-          axios
-            .post('http://localhost:3000/gnn/getAdjacent', params)
+          getAdjacent(params)
             .then(res => {
               this.loading = false
-              if (res.data.status) {
-                this.adjacentMatrix = res.data.adjMatrix
-                this.graphData = res.data.wellName
-                this.graphLink = res.data.wellPair
+              if (res.status) {
+                this.adjacentMatrix = res.adjMatrix
+                this.graphData = res.wellName
+                this.graphLink = res.wellPair
                 let rows = ''
                 this.adjacentMatrix.map(arr => {
                   rows = rows + arr + '\n'
                 })
                 this.adjExport = rows
-                this.$message.success(res.data.message)
+                this.$message.success(res.message)
               } else {
-                this.$message.error(res.data.message)
+                this.$message.error(res.message)
               }
             })
-            .catch(err => {
+            .catch(() => {
               this.loading = false
-              this.$message.error(err.response.data.message)
             })
         }
       })
@@ -219,6 +222,11 @@ export default {
   #graph {
     width: 1000px;
     height: 700px;
+    margin: 0 auto;
+  }
+  .empty {
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
   }
 }

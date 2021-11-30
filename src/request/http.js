@@ -32,7 +32,7 @@ if (process.env.NODE_ENV == 'development') {
   axios.defaults.baseURL = 'http://api.123dailu.com/'
 }
 
-axios.defaults.timeout = 10000 // 请求超时时间
+axios.defaults.timeout = 1000 * 60 * 3 // 请求超时时间
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8' // post请求头
 
 // 请求拦截器
@@ -81,10 +81,6 @@ axios.interceptors.response.use(
           setTimeout(() => {
             toLogin()
           }, 1000)
-          break
-        // 404请求不存在
-        case 404:
-          tip('请求的资源不存在')
           break
         // 其他错误，直接抛出错误提示
         default:
