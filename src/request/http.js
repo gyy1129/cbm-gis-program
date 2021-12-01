@@ -25,7 +25,7 @@ const toLogin = () => {
 
 // 环境的切换
 if (process.env.NODE_ENV == 'development') {
-  axios.defaults.baseURL = 'http://10.52.184.226:3000'
+  axios.defaults.baseURL = 'http://10.100.60.55:3000'
 } else if (process.env.NODE_ENV == 'debug') {
   axios.defaults.baseURL = ''
 } else if (process.env.NODE_ENV == 'production') {

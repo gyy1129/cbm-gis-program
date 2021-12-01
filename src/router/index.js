@@ -118,7 +118,7 @@ const routes = [
       {
         path: '/gis/draw/standard',
         name: 'drawStandard',
-        component: () => import('@/views/contents/gis/Buffer.vue'),
+        component: () => import('@/views/contents/gis/edit/Standard.vue'),
         meta: {
           isLogin: true
         }
@@ -126,7 +126,7 @@ const routes = [
       {
         path: '/gis/draw/free',
         name: 'drawFree',
-        component: () => import('@/views/contents/gis/Standard.vue'),
+        component: () => import('@/views/contents/gis/edit/Free.vue'),
         meta: {
           isLogin: true
         }

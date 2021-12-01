@@ -52,15 +52,11 @@ export default {
     },
     getUserInfo() {
       const params = { id: this.userInfo.id }
-      getUserInfo(params)
-        .then(res => {
-          if (res.status) {
-            this.userInfo.username = res.username
-          }
-        })
-        .catch(err => {
-          this.$message.error(err.message)
-        })
+      getUserInfo(params).then(res => {
+        if (res.status) {
+          this.userInfo.username = res.username
+        }
+      })
     }
   },
   mounted() {

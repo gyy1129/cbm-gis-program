@@ -38,15 +38,15 @@
           <span slot="title">基础地图</span>
         </el-menu-item>
         <el-submenu index="/gis/draw">
-          <template slot="title"><i class="el-icon-add-location"></i>绘图</template>
+          <template slot="title"><i class="el-icon-edit"></i>地图编辑</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/draw/standard">绘制标准图形</el-menu-item>
-            <el-menu-item index="/gis/draw/free">自由绘制图形</el-menu-item>
+            <el-menu-item index="/gis/draw/standard">标准图形编辑</el-menu-item>
+            <el-menu-item index="/gis/draw/free">自由图形编辑</el-menu-item>
             <el-menu-item index="/gis/draw/forecast">预测</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="/gis/edit">
-          <template slot="title"><i class="el-icon-edit" />编辑</template>
+          <template slot="title"><i class="el-icon-add-location" />编辑</template>
           <el-menu-item-group>
             <el-menu-item index="/gis/edit/buffer">聚类</el-menu-item>
           </el-menu-item-group>

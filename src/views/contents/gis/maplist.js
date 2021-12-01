@@ -210,7 +210,7 @@ let source_tiandi = new XYZ({
       let x = tileCoord[1]
       let y = -tileCoord[2] - 1
       return (
-        'https://t0.tianditu.gov.cn/DataServer?tk=5730f1a9e7de7c8f39c7e45725b863da&T=vec_w&x=' +
+        'https://t0.tianditu.gov.cn/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=vec_w&x=' +
         x +
         '&y=' +
         y +
@@ -231,7 +231,7 @@ let source_tiandisat = new XYZ({
       let x = tileCoord[1]
       let y = -tileCoord[2] - 1
       return (
-        'https://t0.tianditu.gov.cn/DataServer?tk=5730f1a9e7de7c8f39c7e45725b863da&T=img_w&x=' +
+        'https://t0.tianditu.gov.cn/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=img_w&x=' +
         x +
         '&y=' +
         y +
@@ -252,7 +252,7 @@ let source_tdtlabeldz = new XYZ({
       let x = tileCoord[1]
       let y = -tileCoord[2] - 1
       return (
-        'https://t0.tianditu.gov.cn/DataServer?tk=5730f1a9e7de7c8f39c7e45725b863da&T=cva_w&x=' +
+        'https://t0.tianditu.gov.cn/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=cva_w&x=' +
         x +
         '&y=' +
         y +
@@ -271,7 +271,7 @@ let source_tdtlabelwx = new XYZ({
       let x = tileCoord[1]
       let y = -tileCoord[2] - 1
       return (
-        'https://t0.tianditu.gov.cn/DataServer?tk=5730f1a9e7de7c8f39c7e45725b863da&T=cia_w&x=' +
+        'https://t0.tianditu.gov.cn/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=cia_w&x=' +
         x +
         '&y=' +
         y +

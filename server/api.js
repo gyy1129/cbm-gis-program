@@ -66,6 +66,7 @@ const getUserInfo = async (request, response) => {
     response.status(200).json({ status: true, username: res.rows[0].name })
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false })
   }
 }
 
