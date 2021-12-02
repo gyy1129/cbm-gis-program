@@ -107,6 +107,7 @@ const routes = [
     component: () => import('@/views/layout/Layout.vue'),
     meta: { title: '煤层气管理项目', isLogin: true },
     children: [
+      // 基础地图
       {
         path: '/gis/map',
         name: 'map',
@@ -115,6 +116,7 @@ const routes = [
           isLogin: true
         }
       },
+      // 地图编辑
       {
         path: '/gis/draw/standard',
         name: 'drawStandard',
@@ -127,14 +129,6 @@ const routes = [
         path: '/gis/draw/free',
         name: 'drawFree',
         component: () => import('@/views/contents/gis/edit/Free.vue'),
-        meta: {
-          isLogin: true
-        }
-      },
-      {
-        path: '/gis/draw/forecast',
-        name: 'drawForecast',
-        component: () => import('@/views/contents/gis/Standard.vue'),
         meta: {
           isLogin: true
         }

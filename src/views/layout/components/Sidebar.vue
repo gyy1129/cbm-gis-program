@@ -40,9 +40,8 @@
         <el-submenu index="/gis/draw">
           <template slot="title"><i class="el-icon-edit"></i>地图编辑</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/draw/standard">标准图形编辑</el-menu-item>
-            <el-menu-item index="/gis/draw/free">自由图形编辑</el-menu-item>
-            <el-menu-item index="/gis/draw/forecast">预测</el-menu-item>
+            <el-menu-item index="/gis/draw/standard"><i class="el-icon-takeaway-box" />标准图形编辑</el-menu-item>
+            <el-menu-item index="/gis/draw/free"><i class="el-icon-brush" />自由图形编辑</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="/gis/edit">

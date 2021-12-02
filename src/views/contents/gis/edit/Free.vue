@@ -1,85 +1,203 @@
 <template>
   <div class="containter">
+    <el-card class="operation_div">
+      <div class="operation_select">
+        <span>选择自由绘制类型：</span>
+        <el-select v-model="geoType" placeholder="请选择" @change="changeType" size="medium">
+          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+        </el-select>
+      </div>
+      <el-button type="primary" @click="editDraw" size="medium">修改已绘制图形</el-button>
+      <el-button type="primary" @click="stopEdit" size="medium" plain>停止修改</el-button>
+      <el-button type="danger" @click="delGeoType" size="medium" plain>清除画笔</el-button>
+      <el-button type="danger" @click="deleteDraw" size="medium">清空绘制</el-button>
+    </el-card>
     <div id="olmap" class="olmap"></div>
   </div>
 </template>
 
 <script>
-import Map from 'ol/Map'
-import View from 'ol/View'
-import TileLayer from 'ol/layer/Tile'
-import { OSM, XYZ } from 'ol/source'
-import { transform } from 'ol/proj'
-
+import 'ol/ol.css'
+import { Map, View } from 'ol'
+import { Vector as VectorSource, XYZ } from 'ol/source'
+import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
+import { Modify, Draw, Snap } from 'ol/interaction'
 export default {
   name: 'olMap',
   components: {},
   data() {
     return {
+      options: [
+        {
+          value: 'LineString',
+          label: '线'
+        },
+        {
+          value: 'Polygon',
+          label: '多边形'
+        },
+
+        {
+          value: 'None',
+          label: '清除画笔'
+        }
+      ],
+      geoType: 'None',
       map: null,
-      proj: 'EPSG:4326', //定义wgs84地图坐标系
-      proj_m: 'EPSG:3857', //定义墨卡托地图坐标系
-      esriMapLayer: null,
-      osmLayer: null,
-      tdtSatelliteLayer: null,
-      gaodeMapLayer: null
+      source: null,
+      vector: null,
+      draw: null,
+      snap: null,
+      modify: null
     }
   },
   mounted() {
     this.initMap()
+    this.addVectorLayer() // 先添加 矢量图层 ；之后 在该图层上 开始绘制
+    this.pointerMove()
   },
   methods: {
+    // 添加 矢量图层
+    addVectorLayer() {
+      this.source = new VectorSource({ wrapX: false })
+      this.vector = new VectorLayer({
+        source: this.source,
+        style: new Style({
+          fill: new Fill({
+            color: 'rgba(30, 144, 255, 0.3)'
+          }),
+          stroke: new Stroke({
+            color: '#1E90FF',
+            width: 2
+          }),
+          image: new CircleStyle({
+            radius: 6,
+            fill: new Fill({
+              color: '#1E90FF'
+            })
+          })
+        })
+      })
+      this.map.addLayer(this.vector)
+    },
+
+    // 开始绘制
+    startDraw(value) {
+      if (value !== 'None') {
+        this.draw = new Draw({
+          source: this.source,
+          type: value,
+          freehand: true,
+          style: new Style({
+            fill: new Fill({
+              color: 'rgba(255, 255, 255, 0.4)'
+            }),
+            stroke: new Stroke({
+              color: '#ffcc33',
+              width: 2
+            }),
+            image: new CircleStyle({
+              radius: 7,
+              fill: new Fill({
+                color: '#ffcc33'
+              })
+            })
+          })
+        })
+        this.map.addInteraction(this.draw)
+        this.snap = new Snap({
+          source: this.source
+        })
+        this.map.addInteraction(this.snap)
+      }
+    },
+
+    // 下拉框 值变化时
+    changeType(value) {
+      // 先 清空  再绘制
+      this.map.removeInteraction(this.draw)
+      this.map.removeInteraction(this.snap)
+      this.startDraw(value)
+    },
+
+    // 编辑已绘制图形
+    editDraw() {
+      if (this.vector) {
+        this.modify = new Modify({
+          source: this.vector.getSource()
+        })
+        this.map.addInteraction(this.modify)
+      }
+    },
+
+    // 停止编辑
+    stopEdit() {
+      if (this.modify) {
+        this.map.removeInteraction(this.modify)
+      }
+    },
+
+    // 清除画笔
+    delGeoType() {
+      this.geoType = 'None'
+      if (this.draw) {
+        this.map.removeInteraction(this.draw)
+        this.map.removeInteraction(this.snap)
+      }
+    },
+
+    // 清空绘制
+    deleteDraw() {
+      if (this.draw) {
+        this.map.removeInteraction(this.draw)
+        this.map.removeInteraction(this.snap)
+      }
+      if (this.vector) {
+        this.vector.getSource().clear()
+        // this.map.removeLayer(this.vector)
+      }
+    },
+    // 初始化 地图
     initMap() {
-      //初始化map对象
+      let tdtwx = new TileLayer({
+        title: '天地图卫星影像',
+        visible: false,
+        source: new XYZ({
+          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=img_w&x={x}&y={y}&l={z}'
+        })
+      })
+      let tdtdz = new TileLayer({
+        title: '天地图路网',
+        visible: true,
+        source: new XYZ({
+          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=vec_w&x={x}&y={y}&l={z}'
+        })
+      })
+      let tdtlabeldz = new TileLayer({
+        title: '天地图文字标注',
+        source: new XYZ({
+          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=cva_w&x={x}&y={y}&l={z}'
+        })
+      })
+
       this.map = new Map({
         target: 'olmap',
-        projection: this.proj,
+        layers: [tdtwx, tdtdz, tdtlabeldz],
         view: new View({
-          center: transform([112.46912, 36.24274], this.proj, this.proj_m),
+          projection: 'EPSG:4326',
+          center: [110.46912, 36.24274],
+          // center: transform([101.46912, 36.24274], 'EPSG:4326', 'EPSG:3857'),
           zoom: 5
         })
       })
-      // this.map.getView().fit([120.33944, 36.049352, 120.442925, 36.126585], this.map.getSize())
-      //ArcGIS地图
-      this.esriMapLayer = new TileLayer({
-        source: new XYZ({
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-        }),
-        title: 'ESRI影像'
+    },
+    // 鼠标 移动时 样式改变
+    pointerMove() {
+      this.map.on('pointermove', e => {
+        const isHover = this.map.hasFeatureAtPixel(e.pixel)
+        this.map.getTargetElement().style.cursor = isHover ? 'pointer' : ''
       })
-      //OSM地图
-      this.osmLayer = new TileLayer({
-        source: new OSM(),
-        title: 'OSM影像'
-      })
-      //天地图
-      this.tdtSatelliteLayer = new TileLayer({
-        source: new XYZ({
-          url: 'http://t3.tianditu.com/DataServer?T=img_w&x={x}&y={y}&l={z}&tk=008a8816d2eee25a677670273eaee891',
-          crossOrigin: 'anonymous'
-        }),
-        title: '天地图影像'
-      })
-      //高德地图
-      this.gaodeMapLayer = new TileLayer({
-        source: new XYZ({
-          url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}'
-        }),
-        title: '高德地图'
-      })
-      //百度地图
-      this.baiduMapLayer = new TileLayer({
-        source: new XYZ({
-          url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}'
-        }),
-        title: '百度地图'
-      })
-
-      //将图层加载到地图对象
-      // this.map.addLayer(this.esriMapLayer)
-      // this.map.addLayer(this.osmLayer)
-      // this.map.addLayer(this.tdtSatelliteLayer)
-      this.map.addLayer(this.gaodeMapLayer)
     }
   }
 }
@@ -89,6 +207,15 @@ export default {
 .containter {
   width: 100%;
   height: 100%;
+  .operation_div {
+    position: absolute;
+    top: 3%;
+    left: 3%;
+    z-index: 2;
+    .operation_select {
+      margin-bottom: 15px;
+    }
+  }
   .olmap {
     width: 100%;
     height: 100%;

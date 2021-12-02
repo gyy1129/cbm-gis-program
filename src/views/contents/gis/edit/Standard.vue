@@ -2,11 +2,10 @@
   <div class="containter">
     <el-card class="operation_div">
       <div class="operation_select">
-        <span>选择几何类型：</span>
+        <span>选择标准几何类型：</span>
         <el-select v-model="geoType" placeholder="请选择" @change="changeType" size="medium">
           <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option>
         </el-select>
-        <el-button type="primary" @click="startDraw" size="medium" style="margin-left: 10px">开始绘制</el-button>
       </div>
       <el-button type="primary" @click="editDraw" size="medium">修改已绘制图形</el-button>
       <el-button type="primary" @click="stopEdit" size="medium" plain>停止修改</el-button>
@@ -89,16 +88,21 @@ export default {
           stroke: new Stroke({
             color: '#1E90FF',
             width: 2
+          }),
+          image: new CircleStyle({
+            radius: 6,
+            fill: new Fill({
+              color: '#1E90FF'
+            })
           })
         })
       })
       this.map.addLayer(this.vector)
     },
+
     // 开始绘制
-    startDraw() {
-      let value = this.geoType
-      console.log(value)
-      // 之后 在该图层上 开始绘制
+    startDraw(value) {
+      this.geometryFunction = null // 要清空 要不然会 影响画线
       if (value !== 'None') {
         if (value === 'Square') {
           value = 'Circle'
@@ -133,17 +137,17 @@ export default {
           source: this.source
         })
         this.map.addInteraction(this.snap)
-      } else {
-        this.delGeoType()
       }
     },
+
     // 下拉框 值变化时
-    changeType() {
-      if (this.draw) {
-        this.map.removeInteraction(this.draw)
-        this.map.removeInteraction(this.snap)
-      }
+    changeType(value) {
+      // 先 清空  再绘制
+      this.map.removeInteraction(this.draw)
+      this.map.removeInteraction(this.snap)
+      this.startDraw(value)
     },
+
     // 编辑已绘制图形
     editDraw() {
       if (this.vector) {
@@ -153,12 +157,14 @@ export default {
         this.map.addInteraction(this.modify)
       }
     },
+
     // 停止编辑
     stopEdit() {
       if (this.modify) {
         this.map.removeInteraction(this.modify)
       }
     },
+
     // 清除画笔
     delGeoType() {
       this.geoType = 'None'
@@ -167,6 +173,7 @@ export default {
         this.map.removeInteraction(this.snap)
       }
     },
+
     // 清空绘制
     deleteDraw() {
       if (this.draw) {
