@@ -4,7 +4,7 @@ const fs = require('fs')
 const multiparty = require('multiparty')
 const exec = require('child_process').exec
 // const execSync = require('child_process').execSync
-const { readFileList, repeat } = require('./tools')
+const { readFileList, repeat, insertData } = require('./tools')
 const JwtUtil = require('./jwt') // 引入jwt token工具
 
 // 登录
@@ -125,8 +125,8 @@ const wellPosition = async (request, response) => {
   }
 }
 
-//  上传文件
-const uploadKmeans = async (req, res) => {
+//  上传csv文件
+const uploadCSV = async (req, res) => {
   //利用multiparty中间件获取文件数据
   let uploadDir = './' //这个不用改，因为并不是保存在这个目录下，这只是作为中间目录，待会要重命名文件到指定目录的
   let form = new multiparty.Form()
@@ -137,7 +137,7 @@ const uploadKmeans = async (req, res) => {
     //其中fields表示你提交的表单数据对象，files表示你提交的文件对象
     //这里是save_path 就是前端传回来的 path 字段，这个字段会被 multiparty 中间件解析到 fields 里面 ，这里的 fields 相当于 req.body 的意思
     let save_path = fields.path
-
+    console.log(fields.path, files.path)
     if (err) {
       res.status(500).json({ status: false, message: '上传出现错误，上传失败！' })
     } else {
@@ -443,6 +443,112 @@ const getTest90DayImg = async (request, response) => {
   }
 }
 
+//  上传文件
+const uploadGeoJson = async (request, response) => {
+  //利用multiparty中间件获取文件数据
+  let uploadDir = './' //这个不用改，因为并不是保存在这个目录下，这只是作为中间目录，待会要重命名文件到指定目录的
+  let form = new multiparty.Form()
+
+  form.uploadDir = uploadDir
+  form.keepExtensions = true //是否保留后缀
+  form.parse(request, async (err, fields, files) => {
+    //其中fields表示你提交的表单数据对象，files表示你提交的文件对象
+    //这里是save_path 就是前端传回来的 path 字段，这个字段会被 multiparty 中间件解析到 fields 里面 ，这里的 fields 相当于 req.body 的意思
+    let save_path = fields.path
+    if (err) {
+      response.status(500).json({ status: false, message: '上传出现错误，上传失败！' })
+    } else {
+      if (!files.file) {
+        response.status(500).json({ status: false, message: '上传失败' })
+      } else {
+        files.file.forEach(file => {
+          fs.rename(file.path, save_path + file.originalFilename, function (err) {
+            err ? console.log('重命名失败') : console.log('重命名成功')
+          })
+        })
+      }
+    }
+    // 读取public中所有的文件 判断是否有重复的文件名
+    let allFiles = readFileList('./public')
+    let exists = false
+    exists = await repeat(exists, files, allFiles)
+    if (exists) {
+      response.status(500).json({ status: false, message: '该文件名已经存在，请重新上传！' })
+    } else {
+      response.status(200).json({ status: true, message: '上传成功' })
+    }
+  })
+}
+
+// geojson上传到数据库中
+const uploadDatabase = async (request, response) => {
+  const fileName = request.body.fileName
+  const fileNameLower = fileName.toLowerCase()
+  const fileContent = fs.readFileSync('./public/' + fileName + '.geojson')
+  if (fileContent) {
+    let tbfile = JSON.parse(fileContent)
+    // console.log(tbfile)
+    try {
+      const q1 = `select count(*) from pg_class where relname = '${fileNameLower}';`
+      // console.log(q1)
+      let res = await pool.query(q1)
+      // console.log(res)
+      if (res.rows[0].count !== '0') {
+        await pool.query(`DROP TABLE ${fileNameLower};`)
+      }
+      await insertData(fileNameLower, tbfile.features)
+      let layerData = { layer: fileName, layerVisual: true }
+      response.status(200).json({ status: true, message: '上传文件已存到数据库', result: tbfile, layerData: layerData })
+    } catch (err) {
+      console.log(err)
+      fs.unlinkSync('./public/' + fileName + '.geojson')
+      response.status(500).json({ status: false, message: '文件格式出错，未存到数据库中，文件已删除' })
+    }
+  }
+}
+
+// 获取 图层属性
+const layerProperty = async (request, response) => {
+  const layer = request.body.layer.toLowerCase()
+  const q = `SELECT * FROM ${layer}`
+  try {
+    let res = await pool.query(q)
+    let keys = Object.keys(res.rows[0])
+    let propertyColumns = []
+    keys.map(item => {
+      propertyColumns.push({ name: item, visible: true })
+    })
+    response.status(200).json({ status: true, results: { propertyData: res.rows, propertyColumns } })
+  } catch (err) {
+    console.log(err.stack)
+    response.status(500).json({ status: false })
+  }
+}
+
+//  读取原来有的geojson文件
+const readOriginGeo = async (request, response) => {
+  // 读取public中所有的文件 判断是否有重复的文件名
+  let allFiles = readFileList('./public')
+  // console.log(allFiles)
+  let geojsonFile = []
+  allFiles.map(file => {
+    if (file.split('.')[1] === 'geojson') {
+      let fileName = file.split('.')[0].split('\\')[1]
+      geojsonFile.push(fileName)
+    }
+  })
+  console.log(geojsonFile)
+  let originGeoJSONArr = []
+  geojsonFile.map(fileName => {
+    let content = fs.readFileSync('./public/' + fileName + '.geojson')
+    let originGeoJSON = JSON.parse(content)
+    let obj = { layerData: { layer: fileName, layerVisual: true }, originGeoJSON: originGeoJSON }
+    originGeoJSONArr.push(obj)
+    // console.log(originGeoJSONArr)
+  })
+
+  response.status(200).json({ status: true, message: '已存在geojson文件', results: originGeoJSONArr })
+}
 module.exports = {
   login,
   register,
@@ -452,7 +558,7 @@ module.exports = {
   cbmGas,
   wellPosition,
 
-  uploadKmeans,
+  uploadCSV,
   getElbowResult,
   getClusterResult,
   displaywell,
@@ -460,5 +566,10 @@ module.exports = {
   getAdjacent,
   getPrediction,
   getTestAllImg,
-  getTest90DayImg
+  getTest90DayImg,
+
+  uploadGeoJson,
+  uploadDatabase,
+  layerProperty,
+  readOriginGeo
 }

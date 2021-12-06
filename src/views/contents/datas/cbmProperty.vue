@@ -45,7 +45,6 @@
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          class="z-pagination"
           :current-page="paginationOptions.currentPage"
           :page-size="paginationOptions.pageSize"
           :page-sizes="paginationOptions.pageSizes"

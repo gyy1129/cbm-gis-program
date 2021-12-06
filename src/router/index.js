@@ -133,28 +133,28 @@ const routes = [
           isLogin: true
         }
       },
-
+      // 图层
       {
-        path: '/gis/edit/buffer',
-        name: 'editBuffer',
-        component: () => import('@/views/contents/gis/Buffer.vue'),
+        path: '/gis/layers/browse',
+        name: 'layersBrowse',
+        component: () => import('@/views/contents/gis/layers/Browse.vue'),
         meta: {
           isLogin: true
         }
       },
-
+      // 空间分析
+      {
+        path: '/gis/spatial/cluster',
+        name: 'spatialCluster',
+        component: () => import('@/views/contents/gis/layers/Ex.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
       {
         path: '/gis/spatial/buffer',
         name: 'spatialBuffer',
         component: () => import('@/views/contents/gis/Buffer.vue'),
-        meta: {
-          isLogin: true
-        }
-      },
-      {
-        path: '/gis/spatial/cluster',
-        name: 'spatialCluster',
-        component: () => import('@/views/contents/gis/Standard.vue'),
         meta: {
           isLogin: true
         }

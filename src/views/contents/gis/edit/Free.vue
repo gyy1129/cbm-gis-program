@@ -209,8 +209,8 @@ export default {
   height: 100%;
   .operation_div {
     position: absolute;
-    top: 3%;
-    left: 3%;
+    top: 2%;
+    left: 1%;
     z-index: 2;
     .operation_select {
       margin-bottom: 15px;

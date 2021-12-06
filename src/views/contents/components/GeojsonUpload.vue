@@ -7,30 +7,30 @@
       ref="upload"
       :on-change="onChange"
       :on-remove="onRemove"
-      multiple
       show-file-list
       class="uploadFile"
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div class="el-upload__tip" slot="tip">只能上传csv文件(utf-8)，且不超过500kb</div>
+      <div class="el-upload__tip" slot="tip">只能上传geojson文件，且不超过500kb</div>
     </el-upload>
     <el-button icon="el-icon-upload" type="primary" style="margin-top: 20px" @click="submitUpload">上传</el-button>
   </div>
 </template>
 
 <script>
-import { uploadCSV } from '@/request/api'
 export default {
-  name: 'uploadFile',
+  name: 'geojsonUpload',
   props: {
     //设置文件保存的路径，作为参数传递进来
-    path: String
+    path: {
+      type: String
+    }
   },
   data() {
     return {
       fileList: [],
-      flagCSV: true,
+      flagGeoJson: true,
       loading: false
     }
   },
@@ -54,42 +54,15 @@ export default {
       })
       //设置文件保存路径
       formData.append('path', this.path)
-      // 判断是否为 空文件
       if (this.fileList.length === 0) {
         this.$message.error('请上传文件！')
         return
       }
-      // 判断是否为csv文件
-      this.judgeCSV()
-      if (this.flagCSV) {
-        this.onUploadCSV(formData)
+      if (this.fileList.length >= 2) {
+        this.$message.error('文件数量超出上限，每位用户最多上传1份文件')
+        return
       }
-    },
-    judgeCSV() {
-      this.fileList.map(file => {
-        if (file.name.split('.')[1] !== 'csv') {
-          this.$message.error('注意上传文件格式，需要上传cvs文件！')
-          this.flagCSV = false
-          return
-        }
-      })
-    },
-    onUploadCSV(formData) {
-      this.loading = true
-      uploadCSV(formData)
-        .then(res => {
-          this.loading = false
-          if (res.status) {
-            this.uploadStatus = true
-            this.$message.success(res.message)
-          } else {
-            this.uploadStatus = false
-            this.$message.error(res.message)
-          }
-        })
-        .catch(() => {
-          this.loading = false
-        })
+      this.$emit('onUploadGeoJson', this.fileList, formData)
     }
   },
   mounted() {}

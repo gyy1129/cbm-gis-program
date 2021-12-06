@@ -8,6 +8,14 @@ app.use(cors())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
+const allowCrossDomain = function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', '*')
+  res.header('Access-Control-Allow-Headers', '*')
+  next()
+}
+app.use(allowCrossDomain)
+
 app.use(function (req, res, next) {
   // 我这里知识把登陆和注册请求去掉了，其他的多有请求都需要进行token校验
   if (req.url != '/login' && req.url != '/register') {
@@ -35,7 +43,7 @@ app.get('/data/cbmProperty', api.cbmProperty)
 app.get('/data/cbmGas', api.cbmGas)
 app.get('/data/wellPosition', api.wellPosition)
 
-app.post('/gnn/uploadKmeans', api.uploadKmeans)
+app.post('/gnn/uploadCSV', api.uploadCSV)
 app.post('/gnn/getElbowResult', api.getElbowResult)
 app.post('/gnn/getClusterResult', api.getClusterResult)
 app.post('/gnn/displaywell', api.displaywell)
@@ -44,6 +52,11 @@ app.post('/gnn/getAdjacent', api.getAdjacent)
 app.post('/gnn/getPrediction', api.getPrediction)
 app.get('/gnn/getTestAllImg', api.getTestAllImg)
 app.get('/gnn/getTest90DayImg', api.getTest90DayImg)
+
+app.post('/gis/uploadGeoJson', api.uploadGeoJson)
+app.post('/gis/uploadDatabase', api.uploadDatabase)
+app.post('/gis/layerProperty', api.layerProperty)
+app.get('/gis/readOriginGeo', api.readOriginGeo)
 
 app.listen(3000, err => {
   if (!err) {

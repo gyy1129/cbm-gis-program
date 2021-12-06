@@ -44,18 +44,18 @@
             <el-menu-item index="/gis/draw/free"><i class="el-icon-brush" />自由图形编辑</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
-        <el-submenu index="/gis/edit">
-          <template slot="title"><i class="el-icon-add-location" />编辑</template>
+        <el-submenu index="/gis/layers">
+          <template slot="title"><i class="el-icon-coin" />图层</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/edit/buffer">聚类</el-menu-item>
+            <el-menu-item index="/gis/layers/browse"><i class="el-icon-add-location" />功能</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="/gis/spatial">
           <template slot="title"><i class="el-icon-location-outline" />空间分析</template>
           <el-menu-item-group>
+            <el-menu-item index="/gis/spatial/cluster">叠置分析</el-menu-item>
             <el-menu-item index="/gis/spatial/buffer">缓冲区分析</el-menu-item>
-            <el-menu-item index="/gis/spatial/cluster">聚类</el-menu-item>
-            <el-menu-item index="/gis/spatial/statistics">统计聚类</el-menu-item>
+            <el-menu-item index="/gis/spatial/statistics">网络分析</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
       </el-submenu>
