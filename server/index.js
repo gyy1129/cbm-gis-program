@@ -57,6 +57,7 @@ app.post('/gis/uploadGeoJson', api.uploadGeoJson)
 app.post('/gis/uploadDatabase', api.uploadDatabase)
 app.post('/gis/layerProperty', api.layerProperty)
 app.get('/gis/readOriginGeo', api.readOriginGeo)
+app.post('/gis/delLayers', api.delLayers)
 
 app.listen(3000, err => {
   if (!err) {

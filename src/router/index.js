@@ -146,7 +146,7 @@ const routes = [
       {
         path: '/gis/spatial/cluster',
         name: 'spatialCluster',
-        component: () => import('@/views/contents/gis/layers/Ex.vue'),
+        component: () => import('@/views/contents/gis/Buffer.vue'),
         meta: {
           isLogin: true
         }

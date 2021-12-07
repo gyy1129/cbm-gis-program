@@ -546,8 +546,20 @@ const readOriginGeo = async (request, response) => {
     originGeoJSONArr.push(obj)
     // console.log(originGeoJSONArr)
   })
+  response.status(200).json({ status: true, results: originGeoJSONArr })
+}
 
-  response.status(200).json({ status: true, message: '已存在geojson文件', results: originGeoJSONArr })
+//  删除图层 同时删除原来geojson文件
+const delLayers = async (request, response) => {
+  const layer = request.body.layer
+  const layerLower = layer.toLowerCase()
+  try {
+    fs.unlinkSync('./public/' + layer + '.geojson')
+    await pool.query(`DROP TABLE ${layerLower};`)
+    response.status(200).json({ status: true, message: '图层删除成功' })
+  } catch {
+    response.status(500).json({ status: false, message: '图层删除失败' })
+  }
 }
 module.exports = {
   login,
@@ -571,5 +583,6 @@ module.exports = {
   uploadGeoJson,
   uploadDatabase,
   layerProperty,
-  readOriginGeo
+  readOriginGeo,
+  delLayers
 }

@@ -13,8 +13,6 @@
             <el-button size="mini" @click="delLayer(row)" type="danger" icon="el-icon-delete" circle></el-button>
             <el-button size="mini" @click="onVisual(row)" type="primary" circle>
               {{ row.layerVisual ? '显' : '隐' }}
-              <!-- <i class="el-icon-view" v-show="layerVisual" />
-              <img src="@/assets/images/biyan.png" v-show="!layerVisual width="80%" /> -->
             </el-button>
           </template>
         </el-table-column>
@@ -28,36 +26,14 @@
       :fullscreen="dialogFull"
       @close="closePropertyDispaly"
     >
-      <FilterColumn :columns="originProCol" @model="getColumns"></FilterColumn>
-      <el-button size="medium" type="primary" @click="downloadPro" icon="el-icon-download">导出属性</el-button>
-      <el-button size="medium" @click="onDialogFull" icon="el-icon-full-screen">
-        {{ dialogFull ? '关闭全屏' : '全屏显示' }}
-      </el-button>
-      <el-table :data="frontEndPageChange">
-        <el-table-column type="index" width="60" label="序号" fixed align="center"></el-table-column>
-        <template v-for="(item, index) in propertyColumns">
-          <el-table-column
-            v-if="item.visible"
-            :key="index"
-            :label="item.name"
-            :prop="item.name"
-            min-width="120"
-            align="center"
-          >
-          </el-table-column>
-        </template>
-      </el-table>
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="paginationOptions.currentPage"
-        :page-size="paginationOptions.pageSize"
-        :page-sizes="paginationOptions.pageSizes"
-        layout="sizes, prev, pager, next, total"
-        :total="propertyData.length"
-        style="text-align: center; margin-top: 10px"
-      >
-      </el-pagination>
+      <Property
+        @downloadPro="downloadPro"
+        @onDialogFull="onDialogFull"
+        :originProCol="originProCol"
+        :propertyData="propertyData"
+        :propertyColumns="propertyColumns"
+        :dialogFull="dialogFull"
+      ></Property>
     </el-dialog>
     <el-dialog title="上传文件" :visible.sync="uploadDialog" center append-to-body>
       <GeojsonUpload :path="path" @onUploadGeoJson="onUploadGeoJson"></GeojsonUpload>
@@ -72,51 +48,45 @@ import { Map, View } from 'ol'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style'
-import GeoJSON from 'ol/format/GeoJSON'
-import GeojsonUpload from '@/views/contents/components/GeojsonUpload.vue'
-import { uploadGeoJson, uploadDatabase, readOriginGeo } from '@/request/api'
-
-import shpwrite from 'shp-write'
 import { click } from 'ol/events/condition.js'
 import { Select } from 'ol/interaction'
-import Attributes from '@/views/contents/gis/components/Attributes.vue'
-import FilterColumn from '@/views/contents/gis/components/FilterColumn.vue'
-import { layerProperty } from '@/request/api'
-import { EXPORT_CSV } from '@/utils/index'
+import GeoJSON from 'ol/format/GeoJSON'
+
 import { cloneDeep } from 'lodash'
+import shpwrite from 'shp-write'
+
+import { EXPORT_CSV } from '@/utils/index'
+import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers } from '@/request/api'
+
+import Property from '@/views/contents/components/Property.vue'
+import GeojsonUpload from '@/views/contents/components/GeojsonUpload.vue'
+import Attributes from '@/views/contents/gis/components/Attributes.vue'
 
 export default {
   name: 'Browse',
-  components: { GeojsonUpload, Attributes, FilterColumn },
+  components: { GeojsonUpload, Attributes, Property },
   data() {
     return {
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
-      uploadDialog: false,
-      flagGeoJson: true,
-      fileName: '',
+      uploadDialog: false, // 添加图层 弹框控制
+      fileName: '', // 上传文件名
+      layerData: [], // layer + layerVisual
+      propertyDispaly: false, // 属性表 弹框控制
+      propertyData: [], // 数据库中存储的 属性数据
+      dialogFull: false, // 属性表 全屏展示控制
+      originGeoJSON: null, // 读取的 geojson
       map: null,
-      layerData: [],
-      propertyDispaly: false,
-      propertyData: [],
-      dialogFull: false,
-      originGeoJSON: null,
       source: null,
       vector: null,
-      geojsonObj: [], // 存放 文件名 geojson vector层
-
-      currentVector: null,
-      curOriginGeoJSON: null,
       select: null,
-      attrTable: null,
-      attributesDiv: null,
-      propertyColumns: [],
-      originProCol: [],
-      paginationOptions: {
-        currentPage: 1, // 当前页
-        pageSize: 10, // 展示页数
-        pageSizes: [10, 20, 30] // 可选择展示页数 数组
-      },
-      downloadProTb: []
+      geojsonObj: [], // 存放 layer名 + geojson + vector层
+      currentVector: null, // 当前的 矢量图层
+      curOriginGeoJSON: null, // 当前的 geojson
+      attrTable: null, // attributes 的container
+      attributesDiv: null, // attributes 整个div
+      propertyColumns: [], // 属性表中的 展示列 会变化
+      originProCol: [], // 属性表中的 展示列 不会变化 是初始列
+      downloadProTb: [] // 下载属性表 处理了csv文件
     }
   },
   created() {
@@ -124,22 +94,33 @@ export default {
   },
   mounted() {
     this.initMap()
-
     this.map.on('click', this.addSelectInteraction)
     this.attributesDiv = document.getElementById('main-attributes')
     this.attrTable = document.getElementById('main-attributes-container')
   },
-  computed: {
-    // 前端分页
-    frontEndPageChange() {
-      let start = (this.paginationOptions.currentPage - 1) * this.paginationOptions.pageSize
-      if (start >= this.propertyData.length) start = 0
-      let end = this.paginationOptions.currentPage * this.paginationOptions.pageSize
-      if (end >= this.propertyData.length) end = this.propertyData.length
-      return this.propertyData.slice(start, end)
-    }
-  },
   methods: {
+    // Property组件 触发函数
+    onDialogFull(dialogFullProp) {
+      this.dialogFull = dialogFullProp
+    },
+    // Property组件 触发导出 属性表
+    downloadPro() {
+      this.downloadProTb = []
+      let key = Object.keys(this.propertyData[0])
+      this.downloadProTb.push(key)
+      this.propertyData.map(item => {
+        let value = Object.values(item)
+        let firstval = '\r\n' + value[0]
+        value.splice(0, 1, firstval)
+        this.downloadProTb.push(value)
+      })
+      EXPORT_CSV(this.downloadProTb, '属性表')
+    },
+    // 关闭 属性弹框
+    closePropertyDispaly() {
+      this.dialogFull = false
+    },
+
     // 读取已有 geojson文件
     readOriginGeo() {
       readOriginGeo()
@@ -149,7 +130,6 @@ export default {
             res.results.map(item => {
               this.originGeoJSON = item.originGeoJSON
               this.layerData.push(item.layerData)
-              this.$message.success(res.message)
               this.addLayer(this.originGeoJSON)
               this.geojsonObj.push({
                 layer: item.layerData.layer,
@@ -157,19 +137,14 @@ export default {
                 vector: this.vector
               })
             })
-            this.$message.success(res.message)
-          } else {
-            this.$message.error(res.message)
+            res.results.length !== 0 && this.$message.success('已获取文件，并展示')
           }
         })
         .catch(() => {
           this.loading = false
         })
     },
-    getColumns(cell) {
-      console.log('cell', cell)
-      this.propertyColumns = cell
-    },
+
     // 选中 图层
     addSelectInteraction(event) {
       this.select && this.select.getFeatures().clear() // 清空已选要素
@@ -192,12 +167,10 @@ export default {
         })
       })
       this.map.addInteraction(this.select)
-      console.log(1111)
-      // console.log(this.select.getSource().getFeatures())
       this.seleceFeatureAndShowProperties(event)
     },
+    // 点选查看属性
     seleceFeatureAndShowProperties(event) {
-      // 点选查看属性
       let that = this
       let pixel = this.map.getEventPixel(event.originalEvent)
       let attrTable = that.attrTable
@@ -290,29 +263,6 @@ export default {
     setRowStyle() {
       return 'fontWeight: bold;textAlign: center;'
     },
-    // 关闭 属性弹框
-    closePropertyDispaly() {
-      this.dialogFull = false
-    },
-    // 全屏展示
-    onDialogFull() {
-      this.dialogFull = !this.dialogFull
-    },
-    // 显示列 设置
-    displaycolumn() {},
-    // 导出 属性表
-    downloadPro() {
-      this.downloadProTb = []
-      let key = Object.keys(this.propertyData[0])
-      this.downloadProTb.push(key)
-      this.propertyData.map(item => {
-        let value = Object.values(item)
-        let firstval = '\r\n' + value[0]
-        value.splice(0, 1, firstval)
-        this.downloadProTb.push(value)
-      })
-      EXPORT_CSV(this.downloadProTb, '属性表')
-    },
 
     // 打开 属性
     openProperty(row) {
@@ -323,7 +273,6 @@ export default {
           if (res.status) {
             this.propertyColumns = res.results.propertyColumns
             this.originProCol = cloneDeep(this.propertyColumns)
-            console.log(this.originProCol, '--------')
             this.propertyData = res.results.propertyData
             this.propertyDispaly = true
           }
@@ -332,12 +281,7 @@ export default {
           this.loading = false
         })
     },
-    handleSizeChange(val) {
-      this.paginationOptions.pageSize = val
-    },
-    handleCurrentChange(val) {
-      this.paginationOptions.currentPage = val
-    },
+
     // 切换 当前geojsonObj
     currentObj(row) {
       this.geojsonObj.map(item => {
@@ -367,6 +311,19 @@ export default {
       this.map.removeLayer(this.currentVector)
       this.layerData = this.layerData.filter(item => item.layer !== row.layer)
       this.geojsonObj = this.geojsonObj.filter(item => item.layer !== row.layer)
+      const params = { layer: row.layer }
+      delLayers(params)
+        .then(res => {
+          this.loading = false
+          if (res.status) {
+            this.$message.success(res.message)
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     // 图层 显示与隐藏
     onVisual(row) {
@@ -429,100 +386,6 @@ export default {
     /deep/.el-table--enable-row-transition .el-table__body td.el-table__cell {
       text-align: center;
     }
-    /*  dialog*/
-    /deep/.el-dialog__header {
-      padding: 15px 20px 15px;
-    }
-    /deep/.el-dialog__headerbtn {
-      top: 15px;
-    }
-
-    /*dialog header*/
-    /deep/.el-dialog__header {
-      background: #e3eaed;
-    }
-    /deep/.avue-crud__dialog__header {
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      -webkit-box-align: center;
-      -ms-flex-align: center;
-      align-items: center;
-      -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-      justify-content: space-between;
-    }
-    /deep/.el-dialog__title {
-      color: rgba(0, 0, 0, 0.85);
-      font-weight: 500;
-      word-wrap: break-word;
-    }
-    /deep/ .avue-crud__dialog__menu {
-      padding-right: 20px;
-      float: left;
-    }
-    /deep/.avue-crud__dialog__menu i {
-      color: #909399;
-      font-size: 15px;
-    }
-    /deep/.el-icon-full-screen {
-      cursor: pointer;
-    }
-    /deep/.el-icon-full-screen:before {
-      content: '\e719';
-    }
   }
-}
-</style>
-
-<style>
-/*隐藏ol的一些自带元素*/
-.ol-attribution,
-.ol-zoom {
-  display: none;
-}
-
-.ol-popup {
-  position: absolute;
-  background-color: #fff;
-  -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #cccccc;
-  bottom: 12px;
-  left: -50px;
-  min-width: 280px;
-}
-.ol-popup:after,
-.ol-popup:before {
-  top: 100%;
-  border: solid transparent;
-  content: ' ';
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-.ol-popup:after {
-  border-top-color: #fff;
-  border-width: 10px;
-  left: 48px;
-  margin-left: -10px;
-}
-.ol-popup:before {
-  border-top-color: #cccccc;
-  border-width: 11px;
-  left: 48px;
-  margin-left: -11px;
-}
-.ol-popup-closer {
-  text-decoration: none;
-  position: absolute;
-  top: 2px;
-  right: 8px;
-}
-.ol-popup-closer:after {
-  content: '✖';
 }
 </style>
