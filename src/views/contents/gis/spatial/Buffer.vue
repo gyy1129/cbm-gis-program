@@ -18,6 +18,46 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <el-card class="tools_card">
+      <el-cascader
+        v-model="method"
+        :options="options"
+        @change="handleChange"
+        placeholder="请选择分析功能"
+      ></el-cascader>
+    </el-card>
+    <el-dialog
+      :title="titleDialog"
+      :visible.sync="methodDisplay"
+      append-to-body
+      width="40%"
+      @close="closeMethodDisplay"
+    >
+      <SpatialAnalysis
+        :geojsonObj="geojsonObj"
+        :layerOptions="layerOptions"
+        :map="map"
+        :analysisForm="analysisForm"
+        :methodName="methodName"
+        @onAnalysis="onAnalysis"
+        @closeMethodDisplay="closeMethodDisplay"
+      ></SpatialAnalysis>
+      <!-- <el-form :model="spatialAnalysis" ref="spatialAnalysisRef" label-width="150px">
+        <el-form-item label="图层：" prop="analysisLayer">
+          <el-select v-model="spatialAnalysis.analysisLayer" placeholder="请选择图层" style="width: 100%">
+            <el-option v-for="item in layerOptions" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="缓冲区半径(米)：" prop="radius">
+          <el-input v-model.number="spatialAnalysis.radius" placeholder="请输入缓冲区半径" clearable></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="methodDisplay = false">取 消</el-button>
+        <el-button type="primary" @click="onAnalysis">确 定</el-button>
+      </div> -->
+    </el-dialog>
     <el-dialog
       title="属性表"
       :visible.sync="propertyDispaly"
@@ -44,27 +84,30 @@
 
 <script>
 import 'ol/ol.css'
-import { Map, View } from 'ol'
+import { Map, View, Feature } from 'ol'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style'
 import { click } from 'ol/events/condition.js'
 import { Select } from 'ol/interaction'
 import GeoJSON from 'ol/format/GeoJSON'
+// import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom'
+import { Polygon } from 'ol/geom'
 
 import { cloneDeep } from 'lodash'
 import shpwrite from 'shp-write'
 
 import { EXPORT_CSV } from '@/utils/index'
-import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers } from '@/request/api'
+import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers, generateGeoJson } from '@/request/api'
 
 import Property from '@/views/contents/components/Property.vue'
 import GeojsonUpload from '@/views/contents/components/GeojsonUpload.vue'
 import Attributes from '@/views/contents/components/Attributes.vue'
+import SpatialAnalysis from '@/views/contents/components/SpatialAnalysis.vue'
 
 export default {
   name: 'Browse',
-  components: { GeojsonUpload, Attributes, Property },
+  components: { GeojsonUpload, Attributes, Property, SpatialAnalysis },
   data() {
     return {
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
@@ -79,14 +122,56 @@ export default {
       source: null,
       vector: null,
       select: null,
-      geojsonObj: [], // 存放 layer名 + geojson + vector层
+      geojsonObj: [], // 存放 layer名 + originGeoJSON + vector层
       currentVector: null, // 当前的 矢量图层
       curOriginGeoJSON: null, // 当前的 geojson
       attrTable: null, // attributes 的container
       attributesDiv: null, // attributes 整个div
       propertyColumns: [], // 属性表中的 展示列 会变化
       originProCol: [], // 属性表中的 展示列 不会变化 是初始列
-      downloadProTb: [] // 下载属性表 处理了csv文件
+      downloadProTb: [], // 下载属性表 处理了csv文件
+
+      method: null, // el-cascader级联选择器 绑定值
+      methodDisplay: false, // 空间分析 弹框控制
+      options: [
+        {
+          value: 'buffer',
+          label: '缓冲区分析'
+        },
+        {
+          value: 'overlay',
+          label: '叠置分析',
+          children: [
+            {
+              value: 'union',
+              label: '联合'
+            },
+            {
+              value: 'intersection',
+              label: '相交'
+            },
+            {
+              value: 'difference',
+              label: '异同'
+            },
+            {
+              value: 'symDifference',
+              label: '对称异同'
+            }
+          ]
+        }
+      ],
+      spatialAnalysis: {
+        analysisLayer: null,
+        radius: 500
+      },
+      titleDialog: null, // 空间分析 弹框名称
+      layerOptions: [], //空间分析 图层选项
+      analysisForm: {
+        bufferForm: false,
+        overlayForm: false
+      },
+      methodName: ''
     }
   },
   created() {
@@ -99,6 +184,85 @@ export default {
     this.attrTable = document.getElementById('main-attributes-container')
   },
   methods: {
+    // 空间分析 取消 + 关闭
+    closeMethodDisplay() {
+      for (let key in this.analysisForm) {
+        this.analysisForm[key] = false
+      }
+      this.method = null
+      this.methodDisplay = false
+    },
+    // 空间分析 确定 触发的 方法
+    onAnalysis(obj) {
+      let features = obj.vectorLayer.getSource().getFeatures()
+      let newFeatures = []
+      let oljson = new GeoJSON()
+      for (let i = 0; i < features.length; i++) {
+        let coordinates = features[i].getGeometry().getCoordinates()
+        let type = features[i].getGeometry().getType()
+        console.log(type)
+        let feature = new Feature({
+          geometry: new Polygon([coordinates]),
+          name: type
+        })
+        newFeatures.push(feature)
+      }
+      //将处理好的features再转化为geojson
+      let newGeoJSON = oljson.writeFeaturesObject(newFeatures)
+      console.log(newGeoJSON)
+      const params = { newGeoJSON, radius: obj.radius }
+      generateGeoJson(params)
+        .then(res => {
+          this.loading = false
+          if (res.status) {
+            this.layerData.push(res.layerData)
+            this.geojsonObj.push({ layer: res.layerData.layer, originGeoJSON: newGeoJSON, vector: obj.vectorLayer })
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+        .catch(() => {
+          this.loading = false
+        })
+      this.closeMethodDisplay()
+    },
+    handleChange(value) {
+      const name = value[value.length - 1]
+      switch (name) {
+        case 'buffer':
+          this.titleDialog = '缓冲区分析'
+          this.analysisForm.bufferForm = true
+          this.methodName = 'buffer'
+          break
+        case 'union':
+          this.titleDialog = '叠置分析-联合'
+          this.analysisForm.overlayForm = true
+          this.methodName = 'union'
+          break
+        case 'intersection':
+          this.titleDialog = '叠置分析-相交'
+          this.analysisForm.overlayForm = true
+          this.methodName = 'intersection'
+          break
+        case 'difference':
+          this.titleDialog = '叠置分析-异同'
+          this.analysisForm.overlayForm = true
+          this.methodName = 'difference'
+          break
+        case 'symDifference':
+          this.titleDialog = '叠置分析-对称异同'
+          this.analysisForm.overlayForm = true
+          this.methodName = 'symDifference'
+          break
+      }
+
+      this.layerOptions = []
+      this.geojsonObj.map(item => {
+        this.layerOptions.push({ label: item.layer, value: item.layer })
+      })
+      this.methodDisplay = true
+    },
+
     // Property组件 触发函数
     onDialogFull(dialogFullProp) {
       this.dialogFull = dialogFullProp
@@ -392,6 +556,12 @@ export default {
     /deep/.el-table--enable-row-transition .el-table__body td.el-table__cell {
       text-align: center;
     }
+  }
+  .tools_card {
+    position: absolute;
+    top: 1%;
+    left: 20%;
+    z-index: 2;
   }
 }
 </style>

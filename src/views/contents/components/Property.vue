@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import FilterColumn from '@/views/contents/gis/components/FilterColumn.vue'
+import FilterColumn from '@/views/contents/components/FilterColumn.vue'
 export default {
   name: 'Property',
   props: {

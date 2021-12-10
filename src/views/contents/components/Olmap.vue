@@ -18,7 +18,7 @@ import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
 import { transform } from 'ol/proj'
-import mapSources from '../maplist'
+import mapSources from '../gis/maplist'
 
 export default {
   components: {},

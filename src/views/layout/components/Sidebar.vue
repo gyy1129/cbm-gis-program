@@ -53,8 +53,8 @@
         <el-submenu index="/gis/spatial">
           <template slot="title"><i class="el-icon-location-outline" />空间分析</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/spatial/cluster">叠置分析</el-menu-item>
             <el-menu-item index="/gis/spatial/buffer">缓冲区分析</el-menu-item>
+            <el-menu-item index="/gis/spatial/overlay">叠置分析</el-menu-item>
             <el-menu-item index="/gis/spatial/statistics">网络分析</el-menu-item>
           </el-menu-item-group>
         </el-submenu>

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import olMap from '@/views/contents/gis/components/Olmap.vue'
+import olMap from '@/views/contents/components/Olmap.vue'
 export default {
   components: {
     'ol-map': olMap

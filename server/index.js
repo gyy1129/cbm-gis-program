@@ -6,7 +6,7 @@ const JwtUtil = require('./jwt')
 
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+app.use(express.json({ limit: '2100000kb' }))
 
 const allowCrossDomain = function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
@@ -58,6 +58,7 @@ app.post('/gis/uploadDatabase', api.uploadDatabase)
 app.post('/gis/layerProperty', api.layerProperty)
 app.get('/gis/readOriginGeo', api.readOriginGeo)
 app.post('/gis/delLayers', api.delLayers)
+app.post('/gis/generateGeoJson', api.generateGeoJson)
 
 app.listen(3000, err => {
   if (!err) {

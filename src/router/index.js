@@ -144,17 +144,17 @@ const routes = [
       },
       // 空间分析
       {
-        path: '/gis/spatial/cluster',
-        name: 'spatialCluster',
-        component: () => import('@/views/contents/gis/Buffer.vue'),
+        path: '/gis/spatial/buffer',
+        name: 'spatialBuffer',
+        component: () => import('@/views/contents/gis/spatial/Buffer.vue'),
         meta: {
           isLogin: true
         }
       },
       {
-        path: '/gis/spatial/buffer',
-        name: 'spatialBuffer',
-        component: () => import('@/views/contents/gis/Buffer.vue'),
+        path: '/gis/spatial/overlay',
+        name: 'spatialOverlay',
+        component: () => import('@/views/contents/gis/spatial/Overlay.vue'),
         meta: {
           isLogin: true
         }
