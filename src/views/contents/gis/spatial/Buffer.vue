@@ -36,27 +36,11 @@
       <SpatialAnalysis
         :geojsonObj="geojsonObj"
         :layerOptions="layerOptions"
-        :map="map"
         :analysisForm="analysisForm"
         :methodName="methodName"
         @onAnalysis="onAnalysis"
         @closeMethodDisplay="closeMethodDisplay"
       ></SpatialAnalysis>
-      <!-- <el-form :model="spatialAnalysis" ref="spatialAnalysisRef" label-width="150px">
-        <el-form-item label="图层：" prop="analysisLayer">
-          <el-select v-model="spatialAnalysis.analysisLayer" placeholder="请选择图层" style="width: 100%">
-            <el-option v-for="item in layerOptions" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="缓冲区半径(米)：" prop="radius">
-          <el-input v-model.number="spatialAnalysis.radius" placeholder="请输入缓冲区半径" clearable></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="methodDisplay = false">取 消</el-button>
-        <el-button type="primary" @click="onAnalysis">确 定</el-button>
-      </div> -->
     </el-dialog>
     <el-dialog
       title="属性表"
@@ -91,8 +75,8 @@ import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style'
 import { click } from 'ol/events/condition.js'
 import { Select } from 'ol/interaction'
 import GeoJSON from 'ol/format/GeoJSON'
-// import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom'
-import { Polygon } from 'ol/geom'
+import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom'
+// import LinearRing from 'ol/geom/LinearRing'
 
 import { cloneDeep } from 'lodash'
 import shpwrite from 'shp-write'
@@ -135,8 +119,22 @@ export default {
       methodDisplay: false, // 空间分析 弹框控制
       options: [
         {
-          value: 'buffer',
-          label: '缓冲区分析'
+          value: 'base',
+          label: '基础分析',
+          children: [
+            {
+              value: 'buffer',
+              label: '缓冲区分析'
+            },
+            {
+              value: 'convexHull',
+              label: '几何凸面'
+            },
+            {
+              value: 'centroid',
+              label: '几何质心'
+            }
+          ]
         },
         {
           value: 'overlay',
@@ -192,6 +190,24 @@ export default {
       this.method = null
       this.methodDisplay = false
     },
+    featureType(type, coordinates) {
+      switch (type) {
+        case 'LineString':
+          return new LineString([coordinates])
+        case 'MultiLineString':
+          return new MultiLineString([coordinates])
+        case 'MultiPoint':
+          return new MultiPoint([coordinates])
+        case 'MultiPolygon':
+          return new MultiPolygon([coordinates])
+        case 'Polygon':
+          return new Polygon([coordinates])
+        case 'Point':
+          return new Point([coordinates])
+        case 'LinearRing':
+          return new LineString([coordinates])
+      }
+    },
     // 空间分析 确定 触发的 方法
     onAnalysis(obj) {
       let features = obj.vectorLayer.getSource().getFeatures()
@@ -201,8 +217,9 @@ export default {
         let coordinates = features[i].getGeometry().getCoordinates()
         let type = features[i].getGeometry().getType()
         console.log(type)
+        let geometry = this.featureType(type, coordinates)
         let feature = new Feature({
-          geometry: new Polygon([coordinates]),
+          geometry: geometry,
           name: type
         })
         newFeatures.push(feature)
@@ -210,7 +227,7 @@ export default {
       //将处理好的features再转化为geojson
       let newGeoJSON = oljson.writeFeaturesObject(newFeatures)
       console.log(newGeoJSON)
-      const params = { newGeoJSON, radius: obj.radius }
+      const params = { newGeoJSON, fileName: obj.fileName }
       generateGeoJson(params)
         .then(res => {
           this.loading = false
@@ -224,15 +241,27 @@ export default {
         .catch(() => {
           this.loading = false
         })
+
+      this.map.addLayer(obj.vectorLayer)
       this.closeMethodDisplay()
     },
     handleChange(value) {
       const name = value[value.length - 1]
       switch (name) {
         case 'buffer':
-          this.titleDialog = '缓冲区分析'
+          this.titleDialog = '基础分析-缓冲区分析'
           this.analysisForm.bufferForm = true
           this.methodName = 'buffer'
+          break
+        case 'convexHull':
+          this.titleDialog = '基础分析-几何凸面'
+          this.analysisForm.convexHullForm = true
+          this.methodName = 'convexHull'
+          break
+        case 'centroid':
+          this.titleDialog = '基础分析-几何质心'
+          this.analysisForm.convexHullForm = true
+          this.methodName = 'centroid'
           break
         case 'union':
           this.titleDialog = '叠置分析-联合'

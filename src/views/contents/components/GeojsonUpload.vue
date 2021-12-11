@@ -12,13 +12,14 @@
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div class="el-upload__tip" slot="tip">只能上传geojson文件，且不超过500kb</div>
+      <div class="el-upload__tip" slot="tip">只能上传geojson文件，文件名不能是纯数字或者中文！</div>
     </el-upload>
     <el-button icon="el-icon-upload" type="primary" style="margin-top: 20px" @click="submitUpload">上传</el-button>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
 export default {
   name: 'geojsonUpload',
   props: {
@@ -30,6 +31,7 @@ export default {
   data() {
     return {
       fileList: [],
+      copyFileList: [],
       flagGeoJson: true,
       loading: false
     }
@@ -48,9 +50,14 @@ export default {
     //上传文件
     submitUpload() {
       let formData = new FormData()
+      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      this.copyFileList = []
       // 向 formData 对象中添加文件
       this.fileList.forEach(file => {
-        formData.append('file', file)
+        let name = file.name.split('.')[0] + '_' + time + '.geojson'
+        let copyFile = new File([file], name)
+        this.copyFileList.push(copyFile)
+        formData.append('file', copyFile)
       })
       //设置文件保存路径
       formData.append('path', this.path)
@@ -62,7 +69,7 @@ export default {
         this.$message.error('文件数量超出上限，每位用户最多上传1份文件')
         return
       }
-      this.$emit('onUploadGeoJson', this.fileList, formData)
+      this.$emit('onUploadGeoJson', this.copyFileList, formData)
     }
   },
   mounted() {}

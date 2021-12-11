@@ -549,16 +549,12 @@ const readOriginGeo = async (request, response) => {
   response.status(200).json({ status: true, results: originGeoJSONArr })
 }
 
-//  删除图层 同时删除 数据库中的geojson表 有文件的删除geojson文件
+//  删除图层 同时删除 数据库中的geojson表 删除geojson文件
 const delLayers = async (request, response) => {
   const layer = request.body.layer
   const layerLower = layer.toLowerCase()
   try {
-    let allFiles = readFileList('./public')
-    allFiles.forEach(filepath => {
-      const file = filepath.split('.')[0].split('\\')[1]
-      if (file === layer) fs.unlinkSync('./public/' + layer + '.geojson')
-    })
+    fs.unlinkSync('./public/' + layer + '.geojson')
     await pool.query(`DROP TABLE ${layerLower};`)
     response.status(200).json({ status: true, message: '图层删除成功' })
   } catch {
@@ -566,23 +562,30 @@ const delLayers = async (request, response) => {
   }
 }
 
-//  生成geojson 上传到数据库
+//  空间分析 生成geojson 上传到数据库
 const generateGeoJson = async (request, response) => {
   const newGeoJSON = request.body.newGeoJSON
-  const radius = request.body.radius
-  const tablename = 'buffer' + radius
+  const fileName = request.body.fileName.toLowerCase()
+  const content = JSON.stringify(newGeoJSON)
   try {
-    const q1 = `select count(*) from pg_class where relname = '${tablename}';`
+    let allFiles = readFileList('./public')
+    allFiles.forEach(filepath => {
+      const file = filepath.split('.')[0].split('\\')[1]
+      if (file === fileName) fs.unlinkSync('./public/' + fileName + '.geojson')
+    })
+    fs.writeFileSync('./public/' + fileName + '.geojson', content)
+
+    const q1 = `select count(*) from pg_class where relname = '${fileName}';`
     let res = await pool.query(q1)
     if (res.rows[0].count !== '0') {
-      await pool.query(`DROP TABLE ${tablename};`)
+      await pool.query(`DROP TABLE ${fileName};`)
     }
-    await insertData(tablename, newGeoJSON.features)
-    let layerData = { layer: tablename, layerVisual: true }
+    await insertData(fileName, newGeoJSON.features)
+    let layerData = { layer: fileName, layerVisual: true }
     response.status(200).json({ status: true, result: newGeoJSON, layerData: layerData })
   } catch (err) {
     console.log(err)
-    await pool.query(`DROP TABLE buffer'${radius};`)
+    await pool.query(`DROP TABLE '${fileName};`)
     response.status(500).json({ status: false, message: '数据出错，未存到数据库中' })
   }
 }
