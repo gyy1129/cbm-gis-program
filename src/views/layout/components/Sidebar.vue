@@ -50,12 +50,12 @@
             <el-menu-item index="/gis/layers/browse"><i class="el-icon-add-location" />功能</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
-        <el-submenu index="/gis/spatial">
-          <template slot="title"><i class="el-icon-location-outline" />空间分析</template>
+        <el-submenu index="/gis/function">
+          <template slot="title"><i class="el-icon-location-outline" />功能</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/spatial/buffer">缓冲区分析</el-menu-item>
-            <el-menu-item index="/gis/spatial/overlay">叠置分析</el-menu-item>
-            <el-menu-item index="/gis/spatial/statistics">网络分析</el-menu-item>
+            <el-menu-item index="/gis/function/spatial">空间分析</el-menu-item>
+            <el-menu-item index="/gis/function/overlay">???</el-menu-item>
+            <el-menu-item index="/gis/function/statistics">不知道</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
       </el-submenu>

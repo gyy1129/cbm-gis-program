@@ -2,6 +2,9 @@
   <div class="">
     <FilterColumn :columns="originProCol" @model="getColumns"></FilterColumn>
     <el-button size="medium" type="primary" @click="downloadPro" icon="el-icon-download">导出属性</el-button>
+    <el-button size="medium" type="primary" @click="downloadGeojson" icon="el-icon-download" plain
+      >下载geojson文件</el-button
+    >
     <el-button size="medium" @click="onDialogFull" icon="el-icon-full-screen">
       {{ dialogFullProp ? '关闭全屏' : '全屏显示' }}
     </el-button>
@@ -49,6 +52,9 @@ export default {
     },
     dialogFull: {
       type: Boolean
+    },
+    curOriginGeoJSON: {
+      type: Object
     }
   },
   components: { FilterColumn },
@@ -79,6 +85,19 @@ export default {
     },
     downloadPro() {
       this.$emit('downloadPro')
+    },
+    // 下载geojson文件 btn
+    downloadGeojson() {
+      let curOriginGeoJSON = JSON.stringify(this.curOriginGeoJSON)
+      let blob = new Blob([curOriginGeoJSON], { type: 'text/json' })
+
+      const link = document.createElement('a')
+      link.download = 'geojson文件.geojson'
+      link.href = window.URL.createObjectURL(blob)
+      link.dataset.downloadurl = ['text/json', link.download, link.href].join(':')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     },
     onDialogFull() {
       this.dialogFullProp = !this.dialogFullProp

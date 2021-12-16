@@ -142,27 +142,27 @@ const routes = [
           isLogin: true
         }
       },
-      // 空间分析
+      // 功能
       {
-        path: '/gis/spatial/buffer',
-        name: 'spatialBuffer',
-        component: () => import('@/views/contents/gis/spatial/Buffer.vue'),
+        path: '/gis/function/spatial',
+        name: 'functionSpatial',
+        component: () => import('@/views/contents/gis/function/Spatial.vue'),
         meta: {
           isLogin: true
         }
       },
       {
-        path: '/gis/spatial/overlay',
-        name: 'spatialOverlay',
-        component: () => import('@/views/contents/gis/spatial/Overlay.vue'),
+        path: '/gis/function/overlay',
+        name: 'functionOverlay',
+        component: () => import('@/views/contents/gis/function/Overlay.vue'),
         meta: {
           isLogin: true
         }
       },
       {
-        path: '/gis/spatial/statistics',
+        path: '/gis/function/statistics',
         name: 'spatialStatistics',
-        component: () => import('@/views/contents/gis/Standard.vue'),
+        component: () => import('@/views/contents/gis/Buffer.vue'),
         meta: {
           isLogin: true
         }
