@@ -4,6 +4,12 @@
       <el-button type="primary" @click="uploadDialog = true" size="medium" style="width: 100%">
         <i class="el-icon-plus" /> 添加图层
       </el-button>
+      <div class="layers_div">
+        <el-tag type="info" class="layers_div_tag">底层OSM地图</el-tag>
+        <el-button size="mini" @click="onMapVisual()" :type="mapVisual ? 'primary' : 'info'" round>
+          {{ mapVisual ? '显示' : '隐藏' }}
+        </el-button>
+      </div>
       <el-table :data="layerData" style="width: 100%" :header-cell-style="setRowStyle">
         <el-table-column fixed prop="layer" label="图层" min-width="120" show-overflow-tooltip> </el-table-column>
         <el-table-column label="操作" min-width="170">
@@ -38,8 +44,8 @@
         :layerOptions="layerOptions"
         :analysisForm="analysisForm"
         :methodName="methodName"
-        @onAnalysis="onAnalysis"
         @closeMethodDisplay="closeMethodDisplay"
+        @projectionAnalysis="projectionAnalysis"
       ></SpatialAnalysis>
     </el-dialog>
     <el-dialog
@@ -57,6 +63,7 @@
         :propertyData="propertyData"
         :propertyColumns="propertyColumns"
         :dialogFull="dialogFull"
+        :curOriginGeoJSON="curOriginGeoJSON"
       ></Property>
     </el-dialog>
     <el-dialog title="上传文件" :visible.sync="uploadDialog" center append-to-body>
@@ -90,7 +97,7 @@ import Attributes from '@/views/contents/components/Attributes.vue'
 import SpatialAnalysis from '@/views/contents/components/SpatialAnalysis.vue'
 
 export default {
-  name: 'Browse',
+  name: 'Projection',
   components: { GeojsonUpload, Attributes, Property, SpatialAnalysis },
   data() {
     return {
@@ -103,6 +110,8 @@ export default {
       dialogFull: false, // 属性表 全屏展示控制
       originGeoJSON: null, // 读取的 geojson
       map: null,
+      mapLayer: null, // 底层 地图图层
+      mapVisual: true,
       source: null,
       vector: null,
       select: null,
@@ -119,44 +128,12 @@ export default {
       methodDisplay: false, // 空间分析 弹框控制
       options: [
         {
-          value: 'base',
-          label: '基础分析',
-          children: [
-            {
-              value: 'buffer',
-              label: '缓冲区分析'
-            },
-            {
-              value: 'convexHull',
-              label: '几何凸面'
-            },
-            {
-              value: 'centroid',
-              label: '几何质心'
-            }
-          ]
+          value: 'toMercator',
+          label: '转换为墨卡托投影'
         },
         {
-          value: 'overlay',
-          label: '叠置分析',
-          children: [
-            {
-              value: 'union',
-              label: '联合'
-            },
-            {
-              value: 'intersection',
-              label: '相交'
-            },
-            {
-              value: 'difference',
-              label: '异同'
-            },
-            {
-              value: 'symDifference',
-              label: '对称异同'
-            }
-          ]
+          value: 'toWgs84',
+          label: '转换为WGS84投影'
         }
       ],
       spatialAnalysis: {
@@ -192,40 +169,43 @@ export default {
     },
     featureType(type, coordinates) {
       switch (type) {
-        case 'LineString':
-          return new LineString([coordinates])
-        case 'MultiLineString':
-          return new MultiLineString([coordinates])
-        case 'MultiPoint':
-          return new MultiPoint([coordinates])
-        case 'MultiPolygon':
-          return new MultiPolygon([coordinates])
-        case 'Polygon':
-          return new Polygon([coordinates])
         case 'Point':
-          return new Point([coordinates])
+          return new Point(coordinates)
+        case 'LineString':
+          return new LineString(coordinates)
+        case 'Polygon':
+          return new Polygon(coordinates)
+        case 'MultiPoint':
+          return new MultiPoint(coordinates)
+        case 'MultiLineString':
+          return new MultiLineString(coordinates)
+        case 'MultiPolygon':
+          return new MultiPolygon(coordinates)
         case 'LinearRing':
-          return new LineString([coordinates])
+          return new LineString(coordinates)
       }
     },
-    // 空间分析 确定 触发的 方法
-    onAnalysis(obj) {
+    // 空间分析 确定 触发的 投影转换
+    projectionAnalysis(obj) {
       let features = obj.vectorLayer.getSource().getFeatures()
       let newFeatures = []
-      let oljson = new GeoJSON()
+      let format = new GeoJSON()
+      // debugger
       for (let i = 0; i < features.length; i++) {
+        // features[i].getGeometry().transform('EPSG:3857', 'EPSG:4326') // 存文件是wgs84格式
         let coordinates = features[i].getGeometry().getCoordinates()
+        let properties = features[i].getProperties()
         let type = features[i].getGeometry().getType()
-        console.log(type)
         let geometry = this.featureType(type, coordinates)
-        let feature = new Feature({
-          geometry: geometry,
-          name: type
-        })
+        let feature = new Feature({ geometry: geometry })
+        // debugger
+        if (this.methodName === 'intersect') feature.setProperties(properties) // 添加 相关属性(obj)
         newFeatures.push(feature)
+        // features[i].getGeometry().transform('EPSG:4326', 'EPSG:3857') //地图显示 还是要3857web墨卡托
       }
+
       //将处理好的features再转化为geojson
-      let newGeoJSON = oljson.writeFeaturesObject(newFeatures)
+      let newGeoJSON = format.writeFeaturesObject(newFeatures)
       console.log(newGeoJSON)
       const params = { newGeoJSON, fileName: obj.fileName }
       generateGeoJson(params)
@@ -245,43 +225,19 @@ export default {
       this.map.addLayer(obj.vectorLayer)
       this.closeMethodDisplay()
     },
+
     handleChange(value) {
       const name = value[value.length - 1]
       switch (name) {
-        case 'buffer':
-          this.titleDialog = '基础分析-缓冲区分析'
-          this.analysisForm.bufferForm = true
-          this.methodName = 'buffer'
+        case 'toMercator':
+          this.titleDialog = '投影转换-转换为墨卡托投影'
+          this.analysisForm.projectionForm = true
+          this.methodName = 'toMercator'
           break
-        case 'convexHull':
-          this.titleDialog = '基础分析-几何凸面'
-          this.analysisForm.convexHullForm = true
-          this.methodName = 'convexHull'
-          break
-        case 'centroid':
-          this.titleDialog = '基础分析-几何质心'
-          this.analysisForm.convexHullForm = true
-          this.methodName = 'centroid'
-          break
-        case 'union':
-          this.titleDialog = '叠置分析-联合'
-          this.analysisForm.overlayForm = true
-          this.methodName = 'union'
-          break
-        case 'intersection':
-          this.titleDialog = '叠置分析-相交'
-          this.analysisForm.overlayForm = true
-          this.methodName = 'intersection'
-          break
-        case 'difference':
-          this.titleDialog = '叠置分析-异同'
-          this.analysisForm.overlayForm = true
-          this.methodName = 'difference'
-          break
-        case 'symDifference':
-          this.titleDialog = '叠置分析-对称异同'
-          this.analysisForm.overlayForm = true
-          this.methodName = 'symDifference'
+        case 'toWgs84':
+          this.titleDialog = '投影转换-转换为WGS84投影'
+          this.analysisForm.projectionForm = true
+          this.methodName = 'toWgs84'
           break
       }
 
@@ -309,6 +265,7 @@ export default {
       })
       EXPORT_CSV(this.downloadProTb, '属性表')
     },
+
     // 关闭 属性弹框
     closePropertyDispaly() {
       this.dialogFull = false
@@ -345,16 +302,16 @@ export default {
         condition: click,
         style: new Style({
           fill: new Fill({
-            color: 'rgba(30, 144, 255, 0.3)'
+            color: 'rgba(100, 197, 103, 0.3)'
           }),
           stroke: new Stroke({
-            color: '#1E90FF',
+            color: '#64c567',
             width: 2
           }),
           image: new CircleStyle({
             radius: 6,
             fill: new Fill({
-              color: '#1E90FF'
+              color: '#64c567'
             })
           })
         })
@@ -459,6 +416,7 @@ export default {
 
     // 打开 属性
     openProperty(row) {
+      this.currentObj(row)
       const params = { layer: row.layer }
       layerProperty(params)
         .then(res => {
@@ -524,6 +482,12 @@ export default {
       this.currentObj(row)
       row.layerVisual ? this.map.addLayer(this.currentVector) : this.map.removeLayer(this.currentVector)
     },
+    // 底层地图 显示与隐藏
+    onMapVisual() {
+      this.mapVisual = !this.mapVisual
+      this.mapVisual ? this.map.addLayer(this.mapLayer) : this.map.removeLayer(this.mapLayer)
+      // console.log(this.mapLayer)
+    },
     // 添加图层
     addLayer(originGeoJSON) {
       this.source = new VectorSource({
@@ -556,13 +520,10 @@ export default {
       this.map.getView().fit(this.source.getExtent(), this.map.getSize())
     },
     initMap() {
+      this.mapLayer = new TileLayer({ source: new OSM() })
       this.map = new Map({
         target: 'map',
-        layers: [
-          new TileLayer({
-            source: new OSM()
-          })
-        ],
+        layers: [this.mapLayer],
         view: new View({
           center: [110.46912, 36.24274],
           zoom: 5
@@ -584,6 +545,17 @@ export default {
     z-index: 2;
     /deep/.el-table--enable-row-transition .el-table__body td.el-table__cell {
       text-align: center;
+    }
+    .layers_div {
+      margin: 10px 0 2px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .layers_div_tag {
+        width: 70%;
+        text-align: center;
+        margin-right: 10px;
+      }
     }
   }
   .tools_card {

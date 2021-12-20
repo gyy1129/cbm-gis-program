@@ -24,6 +24,30 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <el-card class="tools_card">
+      <el-cascader
+        v-model="method"
+        :options="options"
+        @change="handleChange"
+        placeholder="请选择分析功能"
+      ></el-cascader>
+    </el-card>
+    <el-dialog
+      :title="titleDialog"
+      :visible.sync="methodDisplay"
+      append-to-body
+      width="40%"
+      @close="closeMethodDisplay"
+    >
+      <SpatialAnalysis
+        :geojsonObj="geojsonObj"
+        :layerOptions="layerOptions"
+        :analysisForm="analysisForm"
+        :methodName="methodName"
+        @onAnalysis="onAnalysis"
+        @closeMethodDisplay="closeMethodDisplay"
+      ></SpatialAnalysis>
+    </el-dialog>
     <el-dialog
       title="属性表"
       :visible.sync="propertyDispaly"
@@ -51,27 +75,29 @@
 
 <script>
 import 'ol/ol.css'
-import { Map, View } from 'ol'
+import { Map, View, Feature } from 'ol'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style'
 import { click } from 'ol/events/condition.js'
 import { Select } from 'ol/interaction'
 import GeoJSON from 'ol/format/GeoJSON'
+import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom'
 
 import { cloneDeep } from 'lodash'
 import shpwrite from 'shp-write'
 
 import { EXPORT_CSV } from '@/utils/index'
-import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers } from '@/request/api'
+import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers, generateGeoJson } from '@/request/api'
 
 import Property from '@/views/contents/components/Property.vue'
 import GeojsonUpload from '@/views/contents/components/GeojsonUpload.vue'
 import Attributes from '@/views/contents/components/Attributes.vue'
+import SpatialAnalysis from '@/views/contents/components/SpatialAnalysis.vue'
 
 export default {
   name: 'Base',
-  components: { GeojsonUpload, Attributes, Property },
+  components: { GeojsonUpload, Attributes, Property, SpatialAnalysis },
   data() {
     return {
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
@@ -95,7 +121,51 @@ export default {
       attributesDiv: null, // attributes 整个div
       propertyColumns: [], // 属性表中的 展示列 会变化
       originProCol: [], // 属性表中的 展示列 不会变化 是初始列
-      downloadProTb: [] // 下载属性表 处理了csv文件
+      downloadProTb: [], // 下载属性表 处理了csv文件
+
+      method: null, // el-cascader级联选择器 绑定值
+      methodDisplay: false, // 空间分析 弹框控制
+      options: [
+        {
+          value: 'convexHull',
+          label: '几何凸面'
+        },
+        {
+          value: 'centroid',
+          label: '几何质心'
+        },
+        {
+          value: 'multiFeatureCombine',
+          label: '几何并集'
+        },
+        {
+          value: 'dissolve',
+          label: '多要素溶解'
+        },
+        {
+          value: 'tesselate',
+          label: '划分三角形'
+        },
+        {
+          value: 'lineToPolygon',
+          label: '线转面'
+        },
+        {
+          value: 'polygonToLine',
+          label: '面转线'
+        }
+      ],
+      spatialAnalysis: {
+        analysisLayer: null,
+        radius: 500
+      },
+      titleDialog: null, // 空间分析 弹框名称
+      layerOptions: [], //空间分析 图层选项
+      analysisForm: {
+        bufferForm: false,
+        overlayForm: false
+      },
+      methodName: ''
     }
   },
   created() {
@@ -108,6 +178,120 @@ export default {
     this.attrTable = document.getElementById('main-attributes-container')
   },
   methods: {
+    // 空间分析 取消 + 关闭
+    closeMethodDisplay() {
+      for (let key in this.analysisForm) {
+        this.analysisForm[key] = false
+      }
+      this.method = null
+      this.methodDisplay = false
+    },
+    featureType(type, coordinates) {
+      switch (type) {
+        case 'Point':
+          return new Point(coordinates)
+        case 'LineString':
+          return new LineString(coordinates)
+        case 'Polygon':
+          return new Polygon(coordinates)
+        case 'MultiPoint':
+          return new MultiPoint(coordinates)
+        case 'MultiLineString':
+          return new MultiLineString(coordinates)
+        case 'MultiPolygon':
+          return new MultiPolygon(coordinates)
+        case 'LinearRing':
+          return new LineString(coordinates)
+      }
+    },
+
+    // 空间分析 确定 触发的 方法
+    onAnalysis(obj) {
+      let features = obj.vectorLayer.getSource().getFeatures()
+      let newFeatures = []
+      let format = new GeoJSON()
+
+      for (let i = 0; i < features.length; i++) {
+        features[i].getGeometry().transform('EPSG:3857', 'EPSG:4326') // 存文件是wgs84格式
+        let coordinates = features[i].getGeometry().getCoordinates()
+        let properties = features[i].getProperties()
+        let type = features[i].getGeometry().getType()
+        let geometry = this.featureType(type, coordinates)
+        let feature = new Feature({ geometry: geometry })
+
+        if (this.methodName === 'intersect') feature.setProperties(properties) // 添加 相关属性(obj)
+        newFeatures.push(feature)
+        features[i].getGeometry().transform('EPSG:4326', 'EPSG:3857') //地图显示 还是要3857web墨卡托
+      }
+
+      //将处理好的features再转化为geojson
+      let newGeoJSON = format.writeFeaturesObject(newFeatures)
+      console.log(newGeoJSON)
+      const params = { newGeoJSON, fileName: obj.fileName }
+      generateGeoJson(params)
+        .then(res => {
+          this.loading = false
+          if (res.status) {
+            this.layerData.push(res.layerData)
+            this.geojsonObj.push({ layer: res.layerData.layer, originGeoJSON: newGeoJSON, vector: obj.vectorLayer })
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+        .catch(() => {
+          this.loading = false
+        })
+
+      this.map.addLayer(obj.vectorLayer)
+      this.closeMethodDisplay()
+    },
+    handleChange(value) {
+      const name = value[value.length - 1]
+      switch (name) {
+        case 'convexHull':
+          this.titleDialog = '基础分析-几何凸面'
+          this.analysisForm.baseForm = true
+          this.methodName = 'convexHull'
+          break
+        case 'centroid':
+          this.titleDialog = '基础分析-几何质心'
+          this.analysisForm.baseForm = true
+          this.methodName = 'centroid'
+          break
+        case 'multiFeatureCombine':
+          this.titleDialog = '基础分析-几何并集'
+          this.analysisForm.baseForm = true
+          this.methodName = 'multiFeatureCombine'
+          break
+        case 'dissolve':
+          this.titleDialog = '基础分析-多要素溶解'
+          this.analysisForm.baseForm = true
+          this.methodName = 'dissolve'
+          break
+        case 'tesselate':
+          this.titleDialog = '基础分析-划分三角形'
+          this.analysisForm.baseForm = true
+          this.methodName = 'tesselate'
+          break
+        case 'lineToPolygon':
+          this.titleDialog = '基础分析-线转面'
+          this.analysisForm.baseForm = true
+          this.methodName = 'lineToPolygon'
+          break
+        case 'polygonToLine':
+          this.titleDialog = '基础分析-面转线'
+          this.analysisForm.baseForm = true
+          this.methodName = 'polygonToLine'
+          break
+      }
+
+      this.layerOptions = []
+      this.geojsonObj.map(item => {
+        this.layerOptions.push({ label: item.layer, value: item.layer })
+      })
+      this.methodDisplay = true
+    },
+
     // Property组件 触发函数
     onDialogFull(dialogFullProp) {
       this.dialogFull = dialogFullProp
@@ -414,6 +598,12 @@ export default {
         margin-right: 10px;
       }
     }
+  }
+  .tools_card {
+    position: absolute;
+    top: 1%;
+    left: 20%;
+    z-index: 2;
   }
 }
 </style>

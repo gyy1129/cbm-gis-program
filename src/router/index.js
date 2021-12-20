@@ -133,36 +133,53 @@ const routes = [
           isLogin: true
         }
       },
+
       // 图层
       {
-        path: '/gis/layers/browse',
-        name: 'layersBrowse',
+        path: '/gis/layers',
+        name: 'layers',
         component: () => import('@/views/contents/gis/layers/Browse.vue'),
         meta: {
           isLogin: true
         }
       },
-      // 功能
+      // 空间分析
       {
-        path: '/gis/function/spatial',
-        name: 'functionSpatial',
-        component: () => import('@/views/contents/gis/function/Spatial.vue'),
+        path: '/gis/spatial/base',
+        name: 'spatialBase',
+        component: () => import('@/views/contents/gis/spatial/Base.vue'),
         meta: {
           isLogin: true
         }
       },
       {
-        path: '/gis/function/overlay',
-        name: 'functionOverlay',
-        component: () => import('@/views/contents/gis/function/Overlay.vue'),
+        path: '/gis/spatial/buffer',
+        name: 'spatialBuffer',
+        component: () => import('@/views/contents/gis/spatial/Buffer.vue'),
         meta: {
           isLogin: true
         }
       },
       {
-        path: '/gis/function/statistics',
-        name: 'spatialStatistics',
-        component: () => import('@/views/contents/gis/Buffer.vue'),
+        path: '/gis/spatial/overlay',
+        name: 'spatialOverlay',
+        component: () => import('@/views/contents/gis/spatial/Overlay.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/spatial/projection',
+        name: 'spatialProjection',
+        component: () => import('@/views/contents/gis/spatial/Projection.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: '/gis/spatial/clip',
+        name: 'spatialClip',
+        component: () => import('@/views/contents/gis/spatial/Clip.vue'),
         meta: {
           isLogin: true
         }

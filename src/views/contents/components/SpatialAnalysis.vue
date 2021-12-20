@@ -69,6 +69,21 @@
         <el-button type="primary" @click="projectionFormSure">确 定</el-button>
       </div>
     </div>
+    <!-- 裁剪 -->
+    <!-- <div v-show="analysisForm.clipForm">
+      <el-form :model="spatialAnalysis" ref="spatialAnalysisRef" label-width="150px">
+        <el-form-item label="图层：" prop="analysisLayer1">
+          <el-select v-model="spatialAnalysis.analysisLayer1" placeholder="请选择图层" style="width: 100%">
+            <el-option v-for="item in layerOptions" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div class="dialog_footer">
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="clipFormSure">确 定</el-button>
+      </div>
+    </div> -->
   </div>
 </template>
 
@@ -644,7 +659,7 @@ export default {
     //   })
     // },
 
-    // 相交
+    // 联合
     union(features1, features2) {
       let unionFeatures = []
       let unioned = null
@@ -705,6 +720,7 @@ export default {
         })
       })
     },
+    // 相交
     intersection(features1, features2) {
       let intersectFeatures = []
       let intersection = null

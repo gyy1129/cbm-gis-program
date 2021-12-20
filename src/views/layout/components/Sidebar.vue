@@ -34,28 +34,24 @@
       <el-submenu index="/gis">
         <template slot="title"><i class="el-icon-s-promotion" /><span>gis实用功能</span></template>
         <el-menu-item index="/gis/map">
-          <i class="el-icon-map-location"></i>
-          <span slot="title">基础地图</span>
+          <i class="el-icon-map-location" /><span slot="title">基础地图</span>
         </el-menu-item>
         <el-submenu index="/gis/draw">
           <template slot="title"><i class="el-icon-edit"></i>地图编辑</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/draw/standard"><i class="el-icon-takeaway-box" />标准图形编辑</el-menu-item>
+            <el-menu-item index="/gis/draw/standard"><i class="el-icon-add-location" />标准图形编辑</el-menu-item>
             <el-menu-item index="/gis/draw/free"><i class="el-icon-brush" />自由图形编辑</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
-        <el-submenu index="/gis/layers">
-          <template slot="title"><i class="el-icon-coin" />图层</template>
+        <el-menu-item index="/gis/layers"> <i class="el-icon-coin" /><span slot="title">图层</span> </el-menu-item>
+        <el-submenu index="/gis/spatial">
+          <template slot="title"><i class="el-icon-location-outline" />空间分析</template>
           <el-menu-item-group>
-            <el-menu-item index="/gis/layers/browse"><i class="el-icon-add-location" />功能</el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-submenu index="/gis/function">
-          <template slot="title"><i class="el-icon-location-outline" />功能</template>
-          <el-menu-item-group>
-            <el-menu-item index="/gis/function/spatial">空间分析</el-menu-item>
-            <el-menu-item index="/gis/function/overlay">???</el-menu-item>
-            <el-menu-item index="/gis/function/statistics">不知道</el-menu-item>
+            <el-menu-item index="/gis/spatial/base">基础分析</el-menu-item>
+            <el-menu-item index="/gis/spatial/buffer">缓冲区分析</el-menu-item>
+            <el-menu-item index="/gis/spatial/overlay">叠置分析</el-menu-item>
+            <el-menu-item index="/gis/spatial/projection">投影转换</el-menu-item>
+            <el-menu-item index="/gis/spatial/clip">裁剪</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
       </el-submenu>
