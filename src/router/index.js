@@ -172,6 +172,7 @@ const routes = [
         path: '/gis/spatial/projection',
         name: 'spatialProjection',
         component: () => import('@/views/contents/gis/spatial/Projection.vue'),
+        // component: () => import('@/views/contents/gis/Buffer.vue'),
         meta: {
           isLogin: true
         }

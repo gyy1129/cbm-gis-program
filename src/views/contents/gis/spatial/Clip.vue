@@ -31,6 +31,7 @@
         @change="handleChange"
         placeholder="请选择分析功能"
       ></el-cascader>
+      <el-button @click="cancelClip()" type="primary" round>清除裁剪</el-button>
     </el-card>
     <el-dialog
       :title="titleDialog"
@@ -39,15 +40,23 @@
       width="40%"
       @close="closeMethodDisplay"
     >
-      <SpatialAnalysis
-        :geojsonObj="geojsonObj"
-        :layerOptions="layerOptions"
-        :analysisForm="analysisForm"
-        :methodName="methodName"
-        @onAnalysis="onAnalysis"
-        @closeMethodDisplay="closeMethodDisplay"
-        @projectionAnalysis="projectionAnalysis"
-      ></SpatialAnalysis>
+      <div v-show="analysisForm.clipForm">
+        <p style="color: red; text-align: center; margin-bottom: 8px">
+          注意：如果裁剪过图层，请先"清除裁剪"或"刷新"，再进行其他图层的裁剪！
+        </p>
+        <el-form :model="spatialAnalysis" ref="spatialAnalysisRef" label-width="150px">
+          <el-form-item label="图层：" prop="analysisLayer1">
+            <el-select v-model="spatialAnalysis.analysisLayer1" placeholder="请选择图层" style="width: 100%">
+              <el-option v-for="item in layerOptions" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div style="text-align: right">
+          <el-button @click="closeMethodDisplay">取 消</el-button>
+          <el-button type="primary" @click="clipFormSure">确 定</el-button>
+        </div>
+      </div>
     </el-dialog>
     <el-dialog
       title="属性表"
@@ -76,29 +85,27 @@
 
 <script>
 import 'ol/ol.css'
-import { Map, View, Feature } from 'ol'
+import { Map, View } from 'ol'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style'
 import { click } from 'ol/events/condition.js'
-import { Select } from 'ol/interaction'
+import { Select, DragPan } from 'ol/interaction'
 import GeoJSON from 'ol/format/GeoJSON'
-import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom'
 
 import { cloneDeep } from 'lodash'
 import shpwrite from 'shp-write'
 
 import { EXPORT_CSV } from '@/utils/index'
-import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers, generateGeoJson } from '@/request/api'
+import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers } from '@/request/api'
 
 import Property from '@/views/contents/components/Property.vue'
 import GeojsonUpload from '@/views/contents/components/GeojsonUpload.vue'
 import Attributes from '@/views/contents/components/Attributes.vue'
-import SpatialAnalysis from '@/views/contents/components/SpatialAnalysis.vue'
 
 export default {
   name: 'Clip',
-  components: { GeojsonUpload, Attributes, Property, SpatialAnalysis },
+  components: { GeojsonUpload, Attributes, Property },
   data() {
     return {
       path: './public/', // 设置文件上传到服务器的位置，比如服务器下有 public 目录， 你可以在这里写 ./public/
@@ -139,10 +146,15 @@ export default {
       titleDialog: null, // 空间分析 弹框名称
       layerOptions: [], //空间分析 图层选项
       analysisForm: {
-        bufferForm: false,
-        overlayForm: false
+        clipForm: false
       },
-      methodName: ''
+      methodName: '',
+      highlight: null, // 裁剪 feature
+      center: null, // 裁剪 中心
+      rotation: null, // 裁剪 分辨率
+      offsetX: null,
+      offsetY: null,
+      pixelScale: null // 裁剪 像素
     }
   },
   created() {
@@ -155,120 +167,117 @@ export default {
     this.attrTable = document.getElementById('main-attributes-container')
   },
   methods: {
+    // 取消裁剪
+    cancelClip() {
+      this.$router.go(0) // 刷新
+    },
+    // 确认 裁剪
+    clipFormSure() {
+      const { analysisLayer1 } = this.spatialAnalysis
+      if (!analysisLayer1) {
+        this.$message.error('请选择图层')
+        return
+      }
+
+      this.geojsonObj.map(item => {
+        if (analysisLayer1 === item.layer) {
+          this.originGeoJSON1 = item.originGeoJSON
+        }
+      })
+      this.clipAnalyse()
+    },
+    clipAnalyse() {
+      let clipSource = new VectorSource({
+        features: new GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(this.originGeoJSON1)
+      })
+      const clipLayer = new VectorLayer({
+        style: null,
+        source: clipSource
+      })
+      let features = clipLayer.getSource().getFeatures()
+      if (features.length > 1) {
+        this.$message.error('请选择只有一个要素特征的图层')
+        return
+      }
+      features.forEach(feature => {
+        this.highlight = feature
+        let _coord = feature.getGeometry().getCoordinates()
+        console.log(_coord)
+        this.map.render()
+        this.map.on('precompose', this.clip)
+      })
+
+      this.map.getView().setMinZoom(9.5) // zoom  设置一致 禁用放大缩小
+      this.map.getView().setMaxZoom(9.5)
+      // 禁止拖拽
+      this.map.getInteractions().forEach(function (element) {
+        if (element instanceof DragPan) {
+          let pan = element
+          pan.setActive(false)
+        }
+      })
+      this.map.getView().fit(clipSource.getExtent(), this.map.getSize())
+      this.closeMethodDisplay()
+    },
+    clip(evt) {
+      this.canvas = evt.context
+      this.canvas.save()
+      let coords = this.highlight.getGeometry().getCoordinates()
+      let frameState = evt.frameState
+      let pixelRatio = frameState.pixelRatio
+      let viewState = frameState.viewState
+      this.center = viewState.center
+      let resolution = viewState.resolution
+      this.rotation = viewState.rotation
+      let size = frameState.size
+      this.offsetX = Math.round((pixelRatio * size[0]) / 2)
+      this.offsetY = Math.round((pixelRatio * size[1]) / 2)
+      this.pixelScale = pixelRatio / resolution
+
+      this.canvas.beginPath()
+      if (this.highlight.getGeometry().getType() == 'MultiPolygon') {
+        for (let i = 0; i < coords.length; i++) {
+          this.createClip(coords[i][0], this.canvas)
+        }
+      } else if (this.highlight.getGeometry().getType() == 'Polygon') {
+        this.createClip(coords[0], this.canvas)
+      }
+      this.canvas.clip()
+    },
+    createClip(coords, canvas) {
+      for (let i = 0, cout = coords.length; i < cout; i++) {
+        let xLen = Math.round((coords[i][0] - this.center[0]) * this.pixelScale)
+        let yLen = Math.round((this.center[1] - coords[i][1]) * this.pixelScale)
+        let x = this.offsetX
+        let y = this.offsetY
+        if (this.rotation) {
+          x = xLen * Math.cos(this.rotation) - yLen * Math.sin(this.rotation) + this.offsetX
+          y = xLen * Math.sin(this.rotation) + yLen * Math.cos(this.rotation) + this.offsetY
+        } else {
+          x = xLen + this.offsetX
+          y = yLen + this.offsetY
+        }
+        if (i == 0) {
+          canvas.moveTo(x, y)
+        } else {
+          canvas.lineTo(x, y)
+        }
+      }
+      canvas.closePath()
+    },
+
     // 空间分析 取消 + 关闭
     closeMethodDisplay() {
-      for (let key in this.analysisForm) {
-        this.analysisForm[key] = false
-      }
+      this.analysisForm.clipForm = false
       this.method = null
       this.methodDisplay = false
     },
-    featureType(type, coordinates) {
-      switch (type) {
-        case 'Point':
-          return new Point(coordinates)
-        case 'LineString':
-          return new LineString(coordinates)
-        case 'Polygon':
-          return new Polygon(coordinates)
-        case 'MultiPoint':
-          return new MultiPoint(coordinates)
-        case 'MultiLineString':
-          return new MultiLineString(coordinates)
-        case 'MultiPolygon':
-          return new MultiPolygon(coordinates)
-        case 'LinearRing':
-          return new LineString(coordinates)
-      }
-    },
-    // 空间分析 确定 触发的 投影转换
-    projectionAnalysis(obj) {
-      let features = obj.vectorLayer.getSource().getFeatures()
-      let newFeatures = []
-      let format = new GeoJSON()
-      // debugger
-      for (let i = 0; i < features.length; i++) {
-        // features[i].getGeometry().transform('EPSG:3857', 'EPSG:4326') // 存文件是wgs84格式
-        let coordinates = features[i].getGeometry().getCoordinates()
-        let properties = features[i].getProperties()
-        let type = features[i].getGeometry().getType()
-        let geometry = this.featureType(type, coordinates)
-        let feature = new Feature({ geometry: geometry })
-        // debugger
-        if (this.methodName === 'intersect') feature.setProperties(properties) // 添加 相关属性(obj)
-        newFeatures.push(feature)
-        // features[i].getGeometry().transform('EPSG:4326', 'EPSG:3857') //地图显示 还是要3857web墨卡托
-      }
-
-      //将处理好的features再转化为geojson
-      let newGeoJSON = format.writeFeaturesObject(newFeatures)
-      console.log(newGeoJSON)
-      const params = { newGeoJSON, fileName: obj.fileName }
-      generateGeoJson(params)
-        .then(res => {
-          this.loading = false
-          if (res.status) {
-            this.layerData.push(res.layerData)
-            this.geojsonObj.push({ layer: res.layerData.layer, originGeoJSON: newGeoJSON, vector: obj.vectorLayer })
-          } else {
-            this.$message.error(res.message)
-          }
-        })
-        .catch(() => {
-          this.loading = false
-        })
-
-      this.map.addLayer(obj.vectorLayer)
-      this.closeMethodDisplay()
-    },
-    // 空间分析 确定 触发的 方法
-    onAnalysis(obj) {
-      let features = obj.vectorLayer.getSource().getFeatures()
-      let newFeatures = []
-      let format = new GeoJSON()
-      // debugger
-      for (let i = 0; i < features.length; i++) {
-        features[i].getGeometry().transform('EPSG:3857', 'EPSG:4326') // 存文件是wgs84格式
-        let coordinates = features[i].getGeometry().getCoordinates()
-        let properties = features[i].getProperties()
-        let type = features[i].getGeometry().getType()
-        let geometry = this.featureType(type, coordinates)
-        let feature = new Feature({ geometry: geometry })
-        // debugger
-        if (this.methodName === 'intersect') feature.setProperties(properties) // 添加 相关属性(obj)
-        newFeatures.push(feature)
-        features[i].getGeometry().transform('EPSG:4326', 'EPSG:3857') //地图显示 还是要3857web墨卡托
-      }
-
-      //将处理好的features再转化为geojson
-      let newGeoJSON = format.writeFeaturesObject(newFeatures)
-      console.log(newGeoJSON)
-      const params = { newGeoJSON, fileName: obj.fileName }
-      generateGeoJson(params)
-        .then(res => {
-          this.loading = false
-          if (res.status) {
-            this.layerData.push(res.layerData)
-            this.geojsonObj.push({ layer: res.layerData.layer, originGeoJSON: newGeoJSON, vector: obj.vectorLayer })
-          } else {
-            this.$message.error(res.message)
-          }
-        })
-        .catch(() => {
-          this.loading = false
-        })
-
-      this.map.addLayer(obj.vectorLayer)
-      this.closeMethodDisplay()
-    },
+    // 级联选择器 切换
     handleChange(value) {
-      const name = value[value.length - 1]
-      switch (name) {
-        case 'clip':
-          this.titleDialog = '裁剪'
-          this.analysisForm.clipForm = true
-          this.methodName = 'clip'
-          break
+      if (value[value.length - 1] === 'clip') {
+        this.titleDialog = '裁剪'
+        this.analysisForm.clipForm = true
+        this.methodName = 'clip'
       }
 
       this.layerOptions = []
@@ -516,7 +525,6 @@ export default {
     onMapVisual() {
       this.mapVisual = !this.mapVisual
       this.mapVisual ? this.map.addLayer(this.mapLayer) : this.map.removeLayer(this.mapLayer)
-      // console.log(this.mapLayer)
     },
     // 添加图层
     addLayer(originGeoJSON) {

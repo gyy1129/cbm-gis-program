@@ -69,21 +69,6 @@
         <el-button type="primary" @click="projectionFormSure">确 定</el-button>
       </div>
     </div>
-    <!-- 裁剪 -->
-    <!-- <div v-show="analysisForm.clipForm">
-      <el-form :model="spatialAnalysis" ref="spatialAnalysisRef" label-width="150px">
-        <el-form-item label="图层：" prop="analysisLayer1">
-          <el-select v-model="spatialAnalysis.analysisLayer1" placeholder="请选择图层" style="width: 100%">
-            <el-option v-for="item in layerOptions" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div class="dialog_footer">
-        <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="clipFormSure">确 定</el-button>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -120,6 +105,9 @@ export default {
     methodName: {
       type: String,
       required: true
+    },
+    mapLayer: {
+      type: Object
     }
   },
   data() {
@@ -617,48 +605,6 @@ export default {
           break
       }
     },
-    // 联合
-    // union(features1, features2) {
-    //   let unionFeatures = []
-    //   let unioned = null
-
-    //   for (let i = 0; i < features1.length; i++) {
-    //     for (let j = 0; j < features2.length; j++) {
-    //       if (i === 0 && j === 0) {
-    //         unioned = turf.union(features1[0], features2[0])
-    //       } else {
-    //         unioned = turf.union(unioned, features2[j])
-    //       }
-    //     }
-    //     if (i !== 0) unioned = turf.union(unioned, features1[i])
-    //   }
-
-    //   let format = new GeoJSON()
-    //   let unionFeature = format.readFeature(unioned, { featureProjection: 'EPSG:3857' })
-    //   unionFeatures.push(unionFeature)
-
-    //   this.source = new VectorSource()
-    //   this.source.addFeatures(unionFeatures)
-    //   this.vectorLayer = new VectorLayer({
-    //     source: this.source,
-    //     style: new Style({
-    //       fill: new Fill({
-    //         color: 'rgba(255, 255, 255, 0.4)'
-    //       }),
-    //       stroke: new Stroke({
-    //         color: '#ffcc33',
-    //         width: 3
-    //       }),
-    //       image: new CircleStyle({
-    //         radius: 6,
-    //         fill: new Fill({
-    //           color: '#ffcc33'
-    //         })
-    //       })
-    //     })
-    //   })
-    // },
-
     // 联合
     union(features1, features2) {
       let unionFeatures = []
