@@ -57,6 +57,14 @@ const routes = [
         meta: {
           isLogin: true
         }
+      },
+      {
+        path: '/data/timedata',
+        name: 'timedata',
+        component: () => import('@/views/contents/datas/timeData.vue'),
+        meta: {
+          isLogin: true
+        }
       }
     ]
   },

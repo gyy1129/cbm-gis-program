@@ -20,6 +20,7 @@
           <el-menu-item index="/data/cbmproperty"><i class="el-icon-collection" />煤层气属性数据</el-menu-item>
           <el-menu-item index="/data/cbmgas"><i class="el-icon-reading" />煤层气产气时间序列</el-menu-item>
           <el-menu-item index="/data/gisdata"><i class="el-icon-place" />煤层气井地理位置</el-menu-item>
+          <el-menu-item index="/data/timedata"><i class="el-icon-sunrise" />时间序列可视化</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/gnn">

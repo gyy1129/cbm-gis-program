@@ -35,7 +35,7 @@ export default {
   left: 209px;
   height: 100%;
   width: 100%;
-  background-color: #eeeeee;
+  background-color: #f3f4fa;
   .content {
     position: relative;
     top: 0;

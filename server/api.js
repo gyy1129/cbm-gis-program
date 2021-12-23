@@ -125,6 +125,39 @@ const wellPosition = async (request, response) => {
   }
 }
 
+//  获取 煤层气时间序列
+const wellTimeSeries = async (request, response) => {
+  const names = request.body.names
+  console.log(names)
+  try {
+    const qTime = `SELECT date FROM timeseries`
+    let qTimeRes = await pool.query(qTime)
+    let results = []
+    for (let j = 0; j < names.length; j++) {
+      const qOutput = `SELECT "${names[j]}" FROM timeseries`
+      let qOutputRes = await pool.query(qOutput)
+      if (qTimeRes.rowCount === 0 || qOutputRes.rowCount === 0) {
+        response.status(404).json({ status: false, message: '暂无数据' })
+      }
+      let output = []
+      let date = []
+      for (let i = 0; i < qTimeRes.rows.length; i++) {
+        output.push(Number(qOutputRes.rows[i][names[j]]))
+        date.push(qTimeRes.rows[i].date)
+      }
+      results.push({ name: names[j], value: output, date: date })
+
+      if (j === names.length - 1 && results.length > 0) {
+        response.status(200).json({ status: true, results: results, message: '查询成功' })
+      } else {
+        continue
+      }
+    }
+  } catch (err) {
+    console.log(err.stack)
+  }
+}
+
 //  上传csv文件
 const uploadCSV = async (req, res) => {
   //利用multiparty中间件获取文件数据
@@ -589,6 +622,7 @@ const generateGeoJson = async (request, response) => {
     response.status(500).json({ status: false, message: '数据出错，未存到数据库中' })
   }
 }
+
 module.exports = {
   login,
   register,
@@ -597,6 +631,7 @@ module.exports = {
   cbmProperty,
   cbmGas,
   wellPosition,
+  wellTimeSeries,
 
   uploadCSV,
   getElbowResult,

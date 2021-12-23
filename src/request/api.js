@@ -7,6 +7,7 @@ export const getUserInfo = p => post('/getUserInfo', p)
 export const cbmProperty = () => get('/data/cbmProperty')
 export const cbmGas = () => get('/data/cbmGas')
 export const wellPosition = () => get('/data/wellPosition')
+export const wellTimeSeries = p => post('/data/wellTimeSeries', p)
 
 export const uploadCSV = p => post('/gnn/uploadCSV', p)
 export const getElbowResult = p => post('/gnn/getElbowResult', p)

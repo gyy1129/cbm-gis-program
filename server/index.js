@@ -42,6 +42,7 @@ app.post('/getUserInfo', api.getUserInfo)
 app.get('/data/cbmProperty', api.cbmProperty)
 app.get('/data/cbmGas', api.cbmGas)
 app.get('/data/wellPosition', api.wellPosition)
+app.post('/data/wellTimeSeries', api.wellTimeSeries)
 
 app.post('/gnn/uploadCSV', api.uploadCSV)
 app.post('/gnn/getElbowResult', api.getElbowResult)
