@@ -1,9 +1,10 @@
 <template>
   <div class="containter">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <el-card class="box-card">
-        <el-button type="primary" size="medium" @click="onExport" class="btn">导出</el-button>
+        <el-button type="primary" size="medium" @click="onSearch" class="mb10">查询</el-button>
+        <el-button type="primary" size="medium" @click="onExport" class="mb10" plain>导出</el-button>
         <!-- 
           设置一下height, 高度随意设置 height="100px"
           v-tableHeight 指令设置偏移量 v-tableHeight="{ bottomOffset: 60 }"
@@ -68,6 +69,7 @@ export default {
     return {
       firstMenu: '数据报表',
       secondMenu: '煤层气属性数据',
+      loading: false,
       currentPage1: 1,
       tableData: [],
       total: null,
@@ -112,10 +114,15 @@ export default {
       return this.tableData.slice(start, end)
     }
   },
-  mounted() {
+  created() {
     this.getList()
   },
   methods: {
+    // 查询
+    onSearch() {
+      this.getList()
+    },
+    // 导出
     onExport() {
       /**
        * @tableTitleData 表头数据
@@ -123,8 +130,6 @@ export default {
        * @第三个 导出excel名称
        */
       EXPORT_ALL(this.tableTitleData, this.tableData, '煤层气属性数据')
-      // const url = 'http://localhost:3000/download/exportpro'
-      // window.location = url //这里不能使用get方法跳转，否则下载不成功
     },
     handleSizeChange(val) {
       this.paginationOptions.pageSize = val
@@ -133,17 +138,19 @@ export default {
       this.paginationOptions.currentPage = val
     },
     getList() {
+      this.loading = true
       cbmProperty()
         .then(res => {
           if (res.status) {
+            this.loading = false
             this.tableData = res.results
             this.total = res.resultsCount
           } else {
             this.$message.error(res.message)
           }
         })
-        .catch(err => {
-          this.$message.error(err.message)
+        .catch(() => {
+          this.loading = false
         })
     }
   }
@@ -156,10 +163,8 @@ export default {
   left: 18px;
   width: 87%;
   background-color: #fff;
-  .btn {
-    margin: 0px 0 15px 0px;
-    background-color: #49506a;
-    border-color: #49506a;
+  .mb10 {
+    margin-bottom: 10px;
   }
   /deep/.el-table--enable-row-transition .el-table__body td.el-table__cell {
     text-align: center;

@@ -54,6 +54,7 @@ const register = async (request, response) => {
     response.status(200).json({ status: true, message: '注册成功！' })
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: '注册失败，重新注册' })
   }
 }
 
@@ -82,12 +83,14 @@ const cbmProperty = async (request, response) => {
     }
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: '查询失败' })
   }
 }
 
 //  获取 煤层气时间序列
 const cbmGas = async (request, response) => {
-  const q = `SELECT * FROM cbmgas`
+  // const q = `SELECT * FROM cbmgas`
+  const q = `SELECT * FROM timeseries`
   try {
     let res = await pool.query(q)
     if (res.rowCount !== 0) {
@@ -97,6 +100,7 @@ const cbmGas = async (request, response) => {
     }
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: '查询失败' })
   }
 }
 
@@ -122,39 +126,46 @@ const wellPosition = async (request, response) => {
     }
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: '查询失败' })
   }
 }
 
 //  获取 煤层气时间序列
 const wellTimeSeries = async (request, response) => {
   const names = request.body.names
-  console.log(names)
   try {
     const qTime = `SELECT date FROM timeseries`
     let qTimeRes = await pool.query(qTime)
+    if (qTimeRes.rowCount === 0) response.status(404).json({ status: false, message: '没有日期' })
     let results = []
+    // 先判断names是否存在
+    for (let a = 0; a < names.length; a++) {
+      const qName = `SELECT * FROM cbmproperty where well_name = '${names[a]}'`
+      let qNameRes = await pool.query(qName)
+      if (qNameRes.rowCount === 0) response.status(404).json({ status: false, message: '查询的井不存在' })
+    }
+    // 再根据井名 查询时间序列
     for (let j = 0; j < names.length; j++) {
       const qOutput = `SELECT "${names[j]}" FROM timeseries`
       let qOutputRes = await pool.query(qOutput)
-      if (qTimeRes.rowCount === 0 || qOutputRes.rowCount === 0) {
-        response.status(404).json({ status: false, message: '暂无数据' })
-      }
+      if (qOutputRes.rowCount === 0) response.status(404).json({ status: false, message: '暂无数据' })
       let output = []
       let date = []
       for (let i = 0; i < qTimeRes.rows.length; i++) {
         output.push(Number(qOutputRes.rows[i][names[j]]))
         date.push(qTimeRes.rows[i].date)
       }
-      results.push({ name: names[j], value: output, date: date })
-
+      results.push({ name: names[j], value: output })
+      //  退出循环条件
       if (j === names.length - 1 && results.length > 0) {
-        response.status(200).json({ status: true, results: results, message: '查询成功' })
+        response.status(200).json({ status: true, results: results, message: '查询成功', date: date })
       } else {
         continue
       }
     }
   } catch (err) {
     console.log(err.stack)
+    response.status(500).json({ status: false, message: err.stack })
   }
 }
 
@@ -185,8 +196,6 @@ const uploadCSV = async (req, res) => {
             err ? console.log('重命名失败') : console.log('重命名成功')
           })
         })
-        //返回所有上传的文件信息
-        // err ? res.send({ code: 0, message: '上传失败' }) : res.send({ code: 1, message: '上传成功' })
       }
     }
     // 读取public中所有的文件 判断是否有重复的文件名
@@ -234,7 +243,6 @@ const getElbowResult = async (request, response) => {
 const getClusterResult = async (request, response) => {
   let bestK = request.body.bestK
   let fileNameBest = request.body.fileNameBest
-  console.log(request.body)
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
   let exists = false
@@ -418,7 +426,6 @@ const getPrediction = async (request, response) => {
   let adjFile = request.body.adjFile
   let timeFile = request.body.timeFile
   let trainTime = request.body.trainTime
-  console.log(request.body)
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
   let exists = false
@@ -445,7 +452,6 @@ const getPrediction = async (request, response) => {
           console.log(err)
           response.status(404).json({ status: false, message: err.message })
         }
-        // data = data.toString()
         response.status(200).json({ status: true, preEvaluate: stdout, preExport: data, message: '预测结果生成！' })
       })
     }
@@ -485,8 +491,6 @@ const uploadGeoJson = async (request, response) => {
   form.uploadDir = uploadDir
   form.keepExtensions = true //是否保留后缀
   form.parse(request, async (err, fields, files) => {
-    //其中fields表示你提交的表单数据对象，files表示你提交的文件对象
-    //这里是save_path 就是前端传回来的 path 字段，这个字段会被 multiparty 中间件解析到 fields 里面 ，这里的 fields 相当于 req.body 的意思
     let save_path = fields.path
     if (err) {
       response.status(500).json({ status: false, message: '上传出现错误，上传失败！' })
@@ -520,12 +524,9 @@ const uploadDatabase = async (request, response) => {
   const fileContent = fs.readFileSync('./public/' + fileName + '.geojson')
   if (fileContent) {
     let tbfile = JSON.parse(fileContent)
-    // console.log(tbfile)
     try {
       const q1 = `select count(*) from pg_class where relname = '${fileNameLower}';`
-      // console.log(q1)
       let res = await pool.query(q1)
-      // console.log(res)
       if (res.rows[0].count !== '0') {
         await pool.query(`DROP TABLE ${fileNameLower};`)
       }
@@ -562,7 +563,6 @@ const layerProperty = async (request, response) => {
 const readOriginGeo = async (request, response) => {
   // 读取public中所有的文件 判断是否有重复的文件名
   let allFiles = readFileList('./public')
-  // console.log(allFiles)
   let geojsonFile = []
   allFiles.map(file => {
     if (file.split('.')[1] === 'geojson') {
@@ -577,7 +577,6 @@ const readOriginGeo = async (request, response) => {
     let originGeoJSON = JSON.parse(content)
     let obj = { layerData: { layer: fileName, layerVisual: true }, originGeoJSON: originGeoJSON }
     originGeoJSONArr.push(obj)
-    // console.log(originGeoJSONArr)
   })
   response.status(200).json({ status: true, results: originGeoJSONArr })
 }

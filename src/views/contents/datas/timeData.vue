@@ -1,13 +1,17 @@
 <template>
   <div class="containter">
     <Tabs :firstMenu="firstMenu" :secondMenu="secondMenu" />
-    <div class="containter_main">
+    <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <el-card class="mb15">
         <el-form :model="timeData" ref="clusterMax" label-width="120px">
           <el-row :gutter="6">
             <el-col :span="12">
               <el-form-item label="井名：" prop="wellName">
-                <el-input v-model="timeData.wellName" placeholder="请输入井名(中间用','分割)" clearable></el-input>
+                <el-input
+                  v-model="timeData.wellName"
+                  placeholder="请输入井名(中间用','分割)(举例：'华加1,华加10-1,华加10-2)"
+                  clearable
+                ></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="6">
@@ -37,14 +41,14 @@ export default {
     return {
       firstMenu: '数据报表',
       secondMenu: '时间序列可视化',
+      loading: false,
       timeData: {
-        wellName: '华加1,华加10-1'
-        // wellName: '华加1'
+        wellName: '华加1,华加10-1,华加10-2'
+        // wellName: '华加1,华加10-1,华加10-2,华加11-1,华加11-2,华加11-3,华加11,华加12'
       },
       picShow: false,
       name: [],
       rawResults: [],
-      value: null,
       date: null
     }
   },
@@ -52,31 +56,50 @@ export default {
   mounted() {},
   methods: {
     searchTime() {
-      console.log('查询')
+      const names = this.timeData.wellName.split(',')
+      // 数组去空值
+      const namesNotNull = names.filter(name => {
+        return name
+      })
+      if (namesNotNull.length === 0) {
+        this.$message.error('注意输入格式，输入非空值')
+        return
+      }
+      // 数组去重
+      this.names = Array.from(new Set(namesNotNull))
+      if (this.names.length > 12) {
+        this.$message.error('查询有效井数不能超过12个')
+        return
+      }
       this.picShow = true
-      this.names = this.timeData.wellName.split(',')
       this.getTimeData()
     },
     getTimeData() {
+      this.loading = true
       const params = { names: this.names }
       wellTimeSeries(params)
         .then(res => {
+          this.loading = false
           if (res.status) {
-            // this.value = res.results[0].value
-            // this.date = res.results[0].date
             this.rawResults = res.results
+            this.date = res.date
             this.draw()
             this.$message.success(res.message)
           } else {
             this.$message.error(res.message)
           }
         })
-        .catch(err => {
-          console.log(err)
+        .catch(() => {
+          this.loading = false
         })
     },
     draw() {
+      if (this.rawResults.length === 0) {
+        this.$message.error('没有数据')
+        return
+      }
       this.myTimeSeries = echarts.init(document.getElementById('timeSeries'))
+      this.myTimeSeries.clear()
       const seriesList = []
       this.rawResults.map(obj => {
         let series = {
@@ -86,10 +109,12 @@ export default {
           data: obj.value,
           emphasis: { focus: 'series' },
           // labelLayout: { moveOverlap: 'shiftY' },
+          animation: true,
+          animationDuration: 8000,
+          animationEasing: 'cubicInOut',
           endLabel: {
             show: true,
             formatter: function (params) {
-              console.log(params)
               return params.seriesName + ': ' + params.value
             }
           }
@@ -98,9 +123,6 @@ export default {
       })
 
       const option = {
-        // animation: true,
-        // animationDuration: 20000,
-        // animationEasing: 'cubicInOut',
         title: {
           text: '煤层气井时间序列'
         },
@@ -118,6 +140,12 @@ export default {
         xAxis: {
           name: '时间',
           type: 'category',
+          // boundaryGap: false, //坐标轴不留白
+          axisLabel: {
+            //x坐标展示偏移
+            interval: 80,
+            rotate: 60
+          },
           data: this.date
         },
         yAxis: {
@@ -125,27 +153,13 @@ export default {
           name: '产气量'
         },
         grid: {
-          right: 140
+          //canvas距离边界位置
+          left: '6%',
+          right: '7%'
         },
-
         series: seriesList
-        // series: [
-        //   {
-        //     name: names[0],
-        //     type: 'line',
-        //     showSymbol: false,
-        //     data: this.value,
-        //     endLabel: {
-        //       show: true,
-        //       formatter: function (params) {
-        //         console.log(params)
-        //         return params.seriesName + ': ' + params.value
-        //       }
-        //     }
-        //   }
-        // ]
       }
-      this.myTimeSeries.setOption(option)
+      option && this.myTimeSeries.setOption(option)
     }
   }
 }
