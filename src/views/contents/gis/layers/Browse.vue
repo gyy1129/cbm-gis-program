@@ -60,7 +60,7 @@ import { Select } from 'ol/interaction'
 import GeoJSON from 'ol/format/GeoJSON'
 
 import { cloneDeep } from 'lodash'
-import shpwrite from 'shp-write'
+import { GeoShape } from '@/utils/GeoShape.js'
 
 import { EXPORT_CSV } from '@/utils/index'
 import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers } from '@/request/api'
@@ -304,17 +304,8 @@ export default {
     },
     // 下载该图层 转化为 shapefile格式
     downloadLayer(row) {
-      const options = {
-        folder: row.layer,
-        types: {
-          point: row.layer,
-          polygon: row.layer,
-          line: row.layer
-        }
-      }
       this.currentObj(row)
-      console.log(this.curOriginGeoJSON)
-      shpwrite.download(this.curOriginGeoJSON, options)
+      GeoShape.transformAndDownload(this.curOriginGeoJSON, row.layer + '.zip')
     },
     // 删除图层
     delLayer(row) {
@@ -363,7 +354,7 @@ export default {
             color: 'rgba(0, 0, 255, 0.1)'
           }),
           image: new CircleStyle({
-            radius: 6,
+            radius: 3,
             fill: new Fill({
               color: '#1E90FF'
             })

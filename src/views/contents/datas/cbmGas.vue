@@ -16,7 +16,7 @@
           :header-cell-style="{
             color: '#fff',
             fontWeight: 'bold',
-            backgroundColor: '#56677c',
+            backgroundColor: '#687689',
             textAlign: 'center'
           }"
         >

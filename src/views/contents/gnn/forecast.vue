@@ -190,10 +190,12 @@ export default {
             this.allImgSrc = 'data:image/jpge;base64,' + this.allImgBase64
             this.allImgShow = true
           } else {
+            this.allImgShow = false
             this.$message.error(res.message)
           }
         })
         .catch(() => {
+          this.allImgShow = false
           this.loading = false
         })
       // 获取 部分
@@ -206,10 +208,12 @@ export default {
             this.partImgSrc = 'data:image/jpge;base64,' + this.partImgBase64
             this.partImgShow = true
           } else {
+            this.partImgShow = false
             this.$message.error(res.message)
           }
         })
         .catch(() => {
+          this.partImgShow = false
           this.loading = false
         })
     }

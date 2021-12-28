@@ -86,7 +86,7 @@ import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon }
 // import LinearRing from 'ol/geom/LinearRing'
 
 import { cloneDeep } from 'lodash'
-import shpwrite from 'shp-write'
+import { GeoShape } from '@/utils/GeoShape.js'
 
 import { EXPORT_CSV } from '@/utils/index'
 import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers, generateGeoJson } from '@/request/api'
@@ -444,17 +444,8 @@ export default {
     },
     // 下载该图层 转化为 shapefile格式
     downloadLayer(row) {
-      const options = {
-        folder: row.layer,
-        types: {
-          point: row.layer,
-          polygon: row.layer,
-          line: row.layer
-        }
-      }
       this.currentObj(row)
-      console.log(this.curOriginGeoJSON)
-      shpwrite.download(this.curOriginGeoJSON, options)
+      GeoShape.transformAndDownload(this.curOriginGeoJSON, row.layer + '.zip')
     },
     // 删除图层
     delLayer(row) {

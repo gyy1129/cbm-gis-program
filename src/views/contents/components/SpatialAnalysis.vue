@@ -130,7 +130,7 @@ export default {
 
     // 基础分析 确定btn
     baseFormSure() {
-      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      const time = moment(new Date().getTime()).format('MMDD_HHmmss')
       const { analysisLayer1 } = this.spatialAnalysis
       if (!analysisLayer1) {
         this.$message.error('请选择图层')
@@ -485,7 +485,7 @@ export default {
     },
     // 缓冲区 确定btn
     bufferFormSure() {
-      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      const time = moment(new Date().getTime()).format('MMDD_HHmmss')
       const { analysisLayer1, radius } = this.spatialAnalysis
       if (!analysisLayer1) {
         this.$message.error('请选择图层')
@@ -543,7 +543,7 @@ export default {
 
     // 叠置分析 确定btn
     overlayFormSure() {
-      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      const time = moment(new Date().getTime()).format('MMDD_HHmmss')
       const { analysisLayer1, analysisLayer2 } = this.spatialAnalysis
       if (!analysisLayer1) {
         this.$message.error('请选择图层1')
@@ -731,7 +731,7 @@ export default {
 
     // 投影转换 确定btn
     projectionFormSure() {
-      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      const time = moment(new Date().getTime()).format('MMDD_HHmmss')
       const { analysisLayer1 } = this.spatialAnalysis
       if (!analysisLayer1) {
         this.$message.error('请选择图层')

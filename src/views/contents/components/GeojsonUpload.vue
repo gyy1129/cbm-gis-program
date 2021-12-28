@@ -12,7 +12,9 @@
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div class="el-upload__tip" slot="tip">只能上传geojson文件，文件名不能是纯数字或者中文！</div>
+      <div class="el-upload__tip" slot="tip" style="color: #ef2e2e">
+        只能上传geojson文件，文件名不能是纯数字或者中文，可以是数字、字母、下划线！
+      </div>
     </el-upload>
     <el-button icon="el-icon-upload" type="primary" style="margin-top: 20px" @click="submitUpload">上传</el-button>
   </div>
@@ -49,8 +51,20 @@ export default {
     },
     //上传文件
     submitUpload() {
+      if (this.fileList.length === 0) {
+        this.$message.error('请上传文件！')
+        return
+      }
+      if (this.fileList.length >= 2) {
+        this.$message.error('文件数量超出上限，每位用户最多上传1份文件')
+        return
+      }
+      if (this.fileList[0].name.split('.')[1] !== 'geojson') {
+        this.$message.error('请上传geojson格式文件')
+        return
+      }
       let formData = new FormData()
-      const time = moment(new Date().getTime()).format('YYYY_MM_DD_HH_mm_ss')
+      const time = moment(new Date().getTime()).format('MMDD_HHmmss')
       this.copyFileList = []
       // 向 formData 对象中添加文件
       this.fileList.forEach(file => {
@@ -61,14 +75,7 @@ export default {
       })
       //设置文件保存路径
       formData.append('path', this.path)
-      if (this.fileList.length === 0) {
-        this.$message.error('请上传文件！')
-        return
-      }
-      if (this.fileList.length >= 2) {
-        this.$message.error('文件数量超出上限，每位用户最多上传1份文件')
-        return
-      }
+
       this.$emit('onUploadGeoJson', this.copyFileList, formData)
     }
   },

@@ -86,7 +86,7 @@ import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon }
 // import LinearRing from 'ol/geom/LinearRing'
 
 import { cloneDeep } from 'lodash'
-import shpwrite from 'shp-write'
+import { GeoShape } from '@/utils/GeoShape.js'
 
 import { EXPORT_CSV } from '@/utils/index'
 import { uploadGeoJson, uploadDatabase, readOriginGeo, layerProperty, delLayers, generateGeoJson } from '@/request/api'
@@ -129,11 +129,11 @@ export default {
       options: [
         {
           value: 'toMercator',
-          label: '转换为墨卡托投影'
+          label: 'WGS84 转换为 墨卡托投影'
         },
         {
           value: 'toWgs84',
-          label: '转换为WGS84投影'
+          label: '墨卡托 转换为 WGS84投影'
         }
       ],
       spatialAnalysis: {
@@ -230,12 +230,12 @@ export default {
       const name = value[value.length - 1]
       switch (name) {
         case 'toMercator':
-          this.titleDialog = '投影转换-转换为墨卡托投影'
+          this.titleDialog = '投影转换-WGS84转换为墨卡托投影'
           this.analysisForm.projectionForm = true
           this.methodName = 'toMercator'
           break
         case 'toWgs84':
-          this.titleDialog = '投影转换-转换为WGS84投影'
+          this.titleDialog = '投影转换-墨卡托转换为WGS84投影'
           this.analysisForm.projectionForm = true
           this.methodName = 'toWgs84'
           break
@@ -444,17 +444,8 @@ export default {
     },
     // 下载该图层 转化为 shapefile格式
     downloadLayer(row) {
-      const options = {
-        folder: row.layer,
-        types: {
-          point: row.layer,
-          polygon: row.layer,
-          line: row.layer
-        }
-      }
       this.currentObj(row)
-      console.log(this.curOriginGeoJSON)
-      shpwrite.download(this.curOriginGeoJSON, options)
+      GeoShape.transformAndDownload(this.curOriginGeoJSON, row.layer + '.zip')
     },
     // 删除图层
     delLayer(row) {

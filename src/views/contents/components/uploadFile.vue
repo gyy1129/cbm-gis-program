@@ -47,6 +47,11 @@ export default {
     },
     //上传文件
     submitUpload() {
+      // 判断是否为 空文件
+      if (this.fileList.length === 0) {
+        this.$message.error('请上传文件！')
+        return
+      }
       let formData = new FormData()
       // 向 formData 对象中添加文件
       this.fileList.forEach(file => {
@@ -54,11 +59,6 @@ export default {
       })
       //设置文件保存路径
       formData.append('path', this.path)
-      // 判断是否为 空文件
-      if (this.fileList.length === 0) {
-        this.$message.error('请上传文件！')
-        return
-      }
       // 判断是否为csv文件
       this.judgeCSV()
       if (this.flagCSV) {

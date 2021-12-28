@@ -221,10 +221,12 @@ export default {
             this.ElbowValue = res.results
             this.getElbow()
           } else {
+            this.picShow = false
             this.$message.error(res.message)
           }
         })
         .catch(() => {
+          this.picShow = false
           this.loading = false
         })
     },

@@ -86,10 +86,12 @@ export default {
             this.draw()
             this.$message.success(res.message)
           } else {
+            this.picShow = false
             this.$message.error(res.message)
           }
         })
         .catch(() => {
+          this.picShow = false
           this.loading = false
         })
     },

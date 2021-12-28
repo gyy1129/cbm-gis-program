@@ -16,7 +16,7 @@
           :key="index"
           :label="item.name"
           :prop="item.name"
-          min-width="120"
+          min-width="210"
           align="center"
         >
         </el-table-column>
