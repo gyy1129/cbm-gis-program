@@ -73,6 +73,7 @@
 </template>
 
 <script>
+import { Feature } from 'ol'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
@@ -553,6 +554,7 @@ export default {
         this.$message.error('请选择图层2')
         return false
       }
+
       this.geojsonObj.map(item => {
         if (analysisLayer1 === item.layer) {
           this.originGeoJSON1 = item.originGeoJSON
@@ -582,6 +584,7 @@ export default {
         let type = item.geometry.type
         if (type !== 'Polygon' && type !== 'MultiPolygon') return false
       })
+
       if (judgeType1.length !== 0 && judgeType1[0] == false) {
         this.$message.error('请选择Polygon的图层')
         return false
@@ -607,46 +610,29 @@ export default {
     },
     // 联合
     union(features1, features2) {
-      let unionFeatures = []
+      let parser = new jsts.io.OL3Parser()
+      parser.inject(Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon)
+
       let unioned = null
-      let turfValue1 = null
-      let turfValue2 = null
+
       for (let a = 0; a < features1.length; a++) {
-        let coordinates1 = features1[a].getGeometry().getCoordinates()
-        let turfCoordinates1 = []
-        for (let i = 0; i < coordinates1.length; i++) {
-          for (let j = 0; j < coordinates1[0].length; j++) {
-            let feaTransform1 = transform(coordinates1[i][j], 'EPSG:3857', 'EPSG:4326')
-            turfCoordinates1.push(feaTransform1)
-          }
-        }
-        turfValue1 = turf.polygon([turfCoordinates1])
+        let jstsGeom1 = parser.read(features1[a].getGeometry())
 
         for (let b = 0; b < features2.length; b++) {
-          let coordinates2 = features2[b].getGeometry().getCoordinates()
-          let turfCoordinates2 = []
-          for (let i = 0; i < coordinates2.length; i++) {
-            for (let j = 0; j < coordinates2[0].length; j++) {
-              let feaTransform2 = transform(coordinates2[i][j], 'EPSG:3857', 'EPSG:4326')
-              turfCoordinates2.push(feaTransform2)
-            }
-          }
-          turfValue2 = turf.polygon([turfCoordinates2])
+          let jstsGeom2 = parser.read(features2[b].getGeometry())
           if (a === 0 && b === 0) {
-            unioned = turf.union(turfValue1, turfValue2)
+            unioned = jstsGeom1.union(jstsGeom2)
           } else {
-            unioned = turf.union(unioned, turfValue2)
+            unioned = unioned.union(jstsGeom2)
           }
         }
-
-        if (a !== 0) unioned = turf.union(unioned, turfValue1)
+        if (a !== 0) unioned = unioned.union(jstsGeom1)
       }
-      let format = new GeoJSON()
-      let unionFeature = format.readFeature(unioned, { featureProjection: 'EPSG:3857' })
-      unionFeatures.push(unionFeature)
+      let unionFeature = new Feature()
+      unionFeature.setGeometry(parser.write(unioned))
 
       this.source = new VectorSource()
-      this.source.addFeatures(unionFeatures)
+      this.source.addFeatures([unionFeature])
       this.vectorLayer = new VectorLayer({
         source: this.source,
         style: new Style({

@@ -35,6 +35,14 @@ const routes = [
         }
       },
       {
+        path: '/specification',
+        name: 'specification',
+        component: () => import('@/views/components/Specification.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
         path: '/data/cbmproperty',
         name: 'cbmproperty',
         component: () => import('@/views/contents/datas/cbmProperty.vue'),

@@ -662,4 +662,4 @@ class MultiPolygonFileGen extends ESRIFileGen {
   }
 }
 
-export default GeoShape
+export { GeoShape }

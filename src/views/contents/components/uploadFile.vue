@@ -68,7 +68,7 @@ export default {
     judgeCSV() {
       this.fileList.map(file => {
         if (file.name.split('.')[1] !== 'csv') {
-          this.$message.error('注意上传文件格式，需要上传cvs文件！')
+          this.$message.error('注意上传文件格式，需要上传csv文件！')
           this.flagCSV = false
           return
         }

@@ -10,10 +10,8 @@
       text-color="#fff"
       active-text-color="#ffd04b"
     >
-      <el-menu-item index="/home">
-        <i class="el-icon-s-home"></i>
-        <span slot="title">首页</span>
-      </el-menu-item>
+      <el-menu-item index="/home"><i class="el-icon-s-home" /><span slot="title">首页</span></el-menu-item>
+      <el-menu-item index="/specification"> <i class="el-icon-info" /><span slot="title">系统说明</span> </el-menu-item>
       <el-submenu index="/data">
         <template slot="title"><i class="el-icon-document" /><span>数据报表</span></template>
         <el-menu-item-group>
@@ -33,7 +31,7 @@
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/gis">
-        <template slot="title"><i class="el-icon-s-promotion" /><span>gis实用功能</span></template>
+        <template slot="title"><i class="el-icon-s-promotion" /><span>GIS功能</span></template>
         <el-menu-item index="/gis/map">
           <i class="el-icon-map-location" /><span slot="title">基础地图</span>
         </el-menu-item>
