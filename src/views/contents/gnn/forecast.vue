@@ -56,7 +56,7 @@
         </el-row>
       </el-card>
       <!-- 预测结果 可视化 -->
-      <el-row :gutter="11" style="padding-bottom: 20px; margin-bottom: 20px">
+      <el-row :gutter="11">
         <el-col :span="12">
           <el-card class="mb15">
             <div v-show="allImgShow" class="imgDiv">
@@ -247,16 +247,21 @@ export default {
     font-weight: 600;
   }
 }
-.explain {
+/deep/.el-dialog--center .el-dialog__body {
   display: flex;
+  justify-content: center;
   flex-direction: column;
-  align-items: center;
-  p {
-    color: red;
-    padding: 8px 0;
-  }
-  .explain_img {
+  .explain {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    p {
+      color: red;
+      padding: 8px 0;
+    }
+    .explain_img {
+      display: flex;
+    }
   }
 }
 </style>

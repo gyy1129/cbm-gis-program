@@ -4,7 +4,7 @@
     <div class="containter_main" v-loading="loading" element-loading-text="结果马上就好啦！请耐心等待一下~">
       <el-card class="box-card">
         <el-button type="primary" size="medium" @click="onSearch" class="mb10">查询</el-button>
-        <el-button type="primary" size="medium" @click="onExport" plain class="mb10">导出</el-button>
+        <el-button type="primary" size="medium" @click="onExport" plain class="mb10">导出Excel</el-button>
         <el-table
           ref="tableRef"
           stripe

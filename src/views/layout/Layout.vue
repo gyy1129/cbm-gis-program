@@ -39,7 +39,7 @@ export default {
   .content {
     position: relative;
     top: 0;
-    height: 100%;
+    height: calc(100% - 32px);
     overflow-y: auto;
   }
 }

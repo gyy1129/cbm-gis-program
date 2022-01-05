@@ -28,6 +28,9 @@
               <p>
                 <span class="left">纬度：</span><span class="right">{{ infoWindow.info.baidu_lat }}</span>
               </p>
+              <p>
+                <span class="left">平均日产气量：</span><span class="right">{{ infoWindow.info.average_gas }}</span>
+              </p>
             </bm-info-window>
             <bm-label :content="point.well_name" :labelStyle="labelStyle" :offset="{ width: -10, height: 27 }" />
           </bm-marker>
@@ -114,7 +117,7 @@ export default {
     // 查询
     onSearch() {
       const wells = cloneDeep(this.points)
-      wells.find(item => {
+      wells.map(item => {
         if (item.well_name === this.form.wellName) {
           this.form.lng = item.baidu_lng
           this.form.lat = item.baidu_lat

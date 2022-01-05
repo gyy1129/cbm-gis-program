@@ -51,7 +51,7 @@
         </el-row>
       </el-card>
       <!-- 图谱 可视化 -->
-      <el-row style="padding-bottom: 25px; margin-bottom: 25px">
+      <el-row style="padding-bottom: 10px; margin-bottom: 10px">
         <el-card>
           <div id="graph">
             <el-empty description="暂无结果" class="empty" v-show="emptyShow"></el-empty>

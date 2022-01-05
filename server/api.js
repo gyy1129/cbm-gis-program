@@ -117,6 +117,7 @@ const wellPosition = async (request, response) => {
           well_name: row.well_name,
           baidu_lng: row.baidu_lng,
           baidu_lat: row.baidu_lat,
+          average_gas: row.average_gas,
           showFlag: false
         })
       )
