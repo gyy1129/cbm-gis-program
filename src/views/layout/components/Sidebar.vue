@@ -13,21 +13,12 @@
       <el-menu-item index="/home"><i class="el-icon-s-home" /><span slot="title">首页</span></el-menu-item>
       <el-menu-item index="/specification"> <i class="el-icon-info" /><span slot="title">系统说明</span> </el-menu-item>
       <el-submenu index="/data">
-        <template slot="title"><i class="el-icon-document" /><span>数据报表</span></template>
+        <template slot="title"><i class="el-icon-document" /><span>数据管理</span></template>
         <el-menu-item-group>
           <el-menu-item index="/data/cbmproperty"><i class="el-icon-collection" />煤层气属性数据</el-menu-item>
           <el-menu-item index="/data/cbmgas"><i class="el-icon-reading" />煤层气产气时间序列</el-menu-item>
           <el-menu-item index="/data/gisdata"><i class="el-icon-place" />煤层气井地理位置</el-menu-item>
           <el-menu-item index="/data/timedata"><i class="el-icon-sunrise" />时间序列可视化</el-menu-item>
-        </el-menu-item-group>
-      </el-submenu>
-      <el-submenu index="/gnn">
-        <template slot="title"><i class="el-icon-menu" /><span>图神经网络</span></template>
-        <el-menu-item-group>
-          <el-menu-item index="/gnn/cluster"><i class="el-icon-magic-stick" />聚类</el-menu-item>
-          <el-menu-item index="/gnn/draw"><i class="el-icon-coordinate" />构图</el-menu-item>
-          <el-menu-item index="/gnn/adjMatrix"><i class="el-icon-news" />邻接矩阵</el-menu-item>
-          <el-menu-item index="/gnn/forecast"><i class="el-icon-files" />模型预测</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu index="/gis">
@@ -53,6 +44,15 @@
             <el-menu-item index="/gis/spatial/clip">裁剪</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
+      </el-submenu>
+      <el-submenu index="/gnn">
+        <template slot="title"><i class="el-icon-menu" /><span>图神经网络</span></template>
+        <el-menu-item-group>
+          <el-menu-item index="/gnn/cluster"><i class="el-icon-magic-stick" />聚类</el-menu-item>
+          <el-menu-item index="/gnn/draw"><i class="el-icon-coordinate" />构图</el-menu-item>
+          <el-menu-item index="/gnn/adjMatrix"><i class="el-icon-news" />邻接矩阵</el-menu-item>
+          <el-menu-item index="/gnn/forecast"><i class="el-icon-files" />模型预测</el-menu-item>
+        </el-menu-item-group>
       </el-submenu>
     </el-menu>
   </div>

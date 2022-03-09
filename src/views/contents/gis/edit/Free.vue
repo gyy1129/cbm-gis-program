@@ -23,6 +23,7 @@ import { Vector as VectorSource, XYZ } from 'ol/source'
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { Modify, Draw, Snap } from 'ol/interaction'
+import GeoJSON from 'ol/format/GeoJSON'
 export default {
   name: 'olMap',
   components: {},
@@ -181,9 +182,31 @@ export default {
         })
       })
 
+      let well = new VectorLayer({
+        source: new VectorSource({
+          url: '/cbmProperty.geojson', //从文件加载边界等地理信息
+          format: new GeoJSON(),
+          projection: 'EPSG:4326'
+        }),
+        style: new Style({
+          stroke: new Stroke({
+            color: 'rgba(30,144,255)',
+            width: 3
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          }),
+          image: new CircleStyle({
+            radius: 3,
+            fill: new Fill({
+              color: 'red'
+            })
+          })
+        })
+      })
       this.map = new Map({
         target: 'olmap',
-        layers: [tdtwx, tdtdz, tdtlabeldz],
+        layers: [tdtwx, tdtdz, tdtlabeldz, well],
         view: new View({
           projection: 'EPSG:4326',
           center: [110.46912, 36.24274],

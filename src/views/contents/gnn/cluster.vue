@@ -45,9 +45,10 @@
                   <el-input v-model="clusterBest.fileNameBest" placeholder="请输入上传文件名" clearable></el-input>
                 </el-form-item>
               </el-col>
-              <el-col :span="6">
+              <el-col :span="12">
                 <el-form-item>
                   <el-button type="primary" @click="onCluster">k-means聚类</el-button>
+                  <el-button @click="getClusterPic">生成聚类结果图</el-button>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -58,8 +59,8 @@
         <!-- 肘部法则图 -->
         <el-col :span="12">
           <el-card class="box_card mb15">
-            <div id="Elbow" v-show="picShow"></div>
-            <el-empty description="暂无结果" class="empty" v-show="!picShow"></el-empty>
+            <div id="Elbow" v-show="picShow1"></div>
+            <el-empty description="暂无结果" class="empty" v-show="!picShow1"></el-empty>
           </el-card>
         </el-col>
         <!-- 聚类结果 -->
@@ -74,6 +75,15 @@
               readonly
               resize="none"
             ></el-input>
+          </el-card>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <!-- 聚类结果图 -->
+        <el-col :span="12">
+          <el-card class="box_card mb15">
+            <div id="clusterResult" v-show="picShow2"></div>
+            <el-empty description="暂无结果" class="empty" v-show="!picShow2"></el-empty>
           </el-card>
         </el-col>
       </el-row>
@@ -94,6 +104,7 @@ import { EXPORT_ALL } from '@/utils/index'
 import Tabs from '../components/Tabs.vue'
 import uploadFile from '../components/uploadFile.vue'
 import { getElbowResult, getClusterResult } from '@/request/api'
+import { cloneDeep } from 'lodash'
 export default {
   name: 'gisData',
   components: { Tabs, uploadFile },
@@ -109,11 +120,12 @@ export default {
         fileNameMax: 'test'
       },
       clusterBest: {
-        bestK: 4,
+        bestK: 3,
         fileNameBest: 'test'
       },
       kValue: [],
-      picShow: false,
+      picShow1: false,
+      picShow2: false,
       ElbowValue: [],
       clusterValue: [],
       clusterValueShow: '',
@@ -141,7 +153,7 @@ export default {
     drawGraph() {
       this.$refs.clusterMax.validate(valid => {
         if (valid) {
-          this.picShow = true
+          this.picShow1 = true
           this.getElbowResult()
         }
       })
@@ -150,12 +162,75 @@ export default {
     onCluster() {
       this.$refs.clusterMax.validate(valid => {
         if (valid) {
-          this.picShow = true
+          this.picShow1 = true
           this.getClusterResult()
         }
       })
     },
-    // 画图
+    // 画图--聚类结果图（柱状图）
+    getClusterPic() {
+      if (this.clusterValue.length === 0) {
+        this.$message.error('聚类结果为空，不能生成聚类图')
+        return
+      }
+      this.picShow2 = true
+      const clusterValue = cloneDeep(this.clusterValue)
+      const clusterClassify = clusterValue.reduce((prev, next) => {
+        prev[next] = prev[next] + 1 || 1
+        return prev
+      }, {})
+      let classificationKey = Object.keys(clusterClassify).map(key => '聚类' + key)
+      let classificationValue = Object.values(clusterClassify)
+
+      // 开始画图
+      if (this.myClusterResult) this.myClusterResult.dispose()
+      // 初始化echarts实例
+      this.myClusterResult = echarts.init(document.getElementById('clusterResult'))
+      // 配置图表中的数据和样式
+      const option = {
+        title: {
+          left: 'center',
+          text: '聚类结果图'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        toolbox: {
+          feature: {
+            dataView: { show: true, readOnly: false },
+            magicType: { show: true, type: ['line', 'bar'] },
+            saveAsImage: { show: true }
+          }
+        },
+        xAxis: {
+          name: '类别',
+          type: 'category',
+          data: classificationKey,
+          axisTick: {
+            alignWithLabel: true // 刻度居中
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '井数'
+        },
+        series: [
+          {
+            name: '井数',
+            data: classificationValue,
+            type: 'bar',
+            barWidth: '60%'
+          }
+        ]
+      }
+      // 绘制图表
+      option && this.myClusterResult.setOption(option)
+    },
+
+    // 画图--肘部法则图
     getElbow() {
       if (this.myElbow) this.myElbow.dispose()
       // 初始化echarts实例
@@ -221,12 +296,12 @@ export default {
             this.ElbowValue = res.results
             this.getElbow()
           } else {
-            this.picShow = false
+            this.picShow1 = false
             this.$message.error(res.message)
           }
         })
         .catch(() => {
-          this.picShow = false
+          this.picShow1 = false
           this.loading = false
         })
     },
@@ -290,6 +365,11 @@ export default {
       margin: 0 auto;
     }
     .empty {
+      width: 600px;
+      height: 400px;
+      margin: 0 auto;
+    }
+    #clusterResult {
       width: 600px;
       height: 400px;
       margin: 0 auto;

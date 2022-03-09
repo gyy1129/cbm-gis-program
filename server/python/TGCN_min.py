@@ -309,7 +309,7 @@ for epoch in range(training_epoch):
     test_var.append(var_score)
     test_pred.append(test_output1)
 
-    print('训练次数:{}'.format(epoch),
+    print('Iter:{}'.format(epoch),
           'train_rmse:{:.4} '.format(batch_rmse[-1]),
           'test_loss:{:.4} '.format(loss2),
           'test_rmse:{:.4} '.format(rmse),
@@ -324,7 +324,7 @@ for epoch in range(training_epoch):
 
 time_end = time.time()
 print()
-print('模型运行时间：', time_end - time_start, 's')
+# print('模型运行时间：', time_end - time_start, 's')
 print()
 
 ############## visualization ###############
@@ -343,9 +343,10 @@ var.to_csv(path + '/test_result.csv', index=False, header=False)
 plot_result(test_result, test_label1, path)
 # plot_error(train_rmse,train_loss,test_rmse,test_acc,test_mae,path)
 
-print('总体评价： '
-      'min_rmse:%r ' % (np.min(test_rmse)),
-      'min_mae:%r ' % (test_mae[index]),
-      'max_acc:%r ' % (test_acc[index]),
-      'r2:%r ' % (test_r2[index]),
-      'var:%r ' % test_var[index])
+print(
+    'ave_rmse:%r' % (np.mean(test_rmse)),
+    'min_rmse:%r ' % (np.min(test_rmse)),
+    'min_mae:%r ' % (test_mae[index]),
+    'max_acc:%r ' % (test_acc[index]),
+    'r2:%r ' % (test_r2[index]),
+    'var:%r ' % test_var[index])

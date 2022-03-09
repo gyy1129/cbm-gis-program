@@ -24,6 +24,7 @@ import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { Modify, Draw, Snap } from 'ol/interaction'
 import { createBox, createRegularPolygon } from 'ol/interaction/Draw'
+import GeoJSON from 'ol/format/GeoJSON'
 // import { transform } from 'ol/proj'
 export default {
   name: 'olMap',
@@ -187,30 +188,44 @@ export default {
     },
     // 初始化 地图
     initMap() {
-      let tdtwx = new TileLayer({
-        title: '天地图卫星影像',
-        visible: false,
+      let gaodesat = new TileLayer({
+        title: '高德卫星影像',
         source: new XYZ({
-          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=img_w&x={x}&y={y}&l={z}'
-        })
-      })
-      let tdtdz = new TileLayer({
-        title: '天地图路网',
-        visible: true,
-        source: new XYZ({
-          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=vec_w&x={x}&y={y}&l={z}'
-        })
-      })
-      let tdtlabeldz = new TileLayer({
-        title: '天地图文字标注',
-        source: new XYZ({
-          url: 'http://t0.tianditu.com/DataServer?tk=8f0bc4129baf86e449f8eaf7b98a0e80&T=cva_w&x={x}&y={y}&l={z}'
+          url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=6&x={x}&y={y}&z={z}'
         })
       })
 
+      let gaodesatlabel = new TileLayer({
+        title: '高德文字标注',
+        source: new XYZ({
+          url: 'http://webst0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}'
+        })
+      })
+      let well = new VectorLayer({
+        source: new VectorSource({
+          url: '/cbmProperty.geojson', //从文件加载边界等地理信息
+          format: new GeoJSON(),
+          projection: 'EPSG:4326'
+        }),
+        style: new Style({
+          stroke: new Stroke({
+            color: 'rgba(30,144,255)',
+            width: 3
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          }),
+          image: new CircleStyle({
+            radius: 3,
+            fill: new Fill({
+              color: 'red'
+            })
+          })
+        })
+      })
       this.map = new Map({
         target: 'olmap',
-        layers: [tdtwx, tdtdz, tdtlabeldz],
+        layers: [gaodesat, gaodesatlabel, well],
         view: new View({
           projection: 'EPSG:4326',
           center: [110.46912, 36.24274],
