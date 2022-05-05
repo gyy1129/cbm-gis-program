@@ -280,6 +280,47 @@ def evaluation(a, b):
     var = 1 - (np.var(a - b)) / np.var(a)
     return rmse, mae, 1 - F_norm, r2, var
 
+####### 修改添加函数 ######
+
+
+def update(test_label):
+    row = test_label.shape[0]
+    col = test_label.shape[1]
+    new_row = int((row - (1 + 6) * 6 / 2 * 2) / output_dim)
+    new_test_label = np.zeros(shape=(new_row + 6 * 2, col))
+    # 前六个日期
+    new_test_label[0][:] = test_label[0][:]
+    new_test_label[-1][:] = test_label[-1][:]
+    for i in range(col):
+        new_test_label[1][i] = (test_label[1][i] + test_label[1 + 6][i]) / 2
+        new_test_label[-2][i] = (test_label[-2][i] + test_label[-2 - 6][i]) / 2
+        new_test_label[2][i] = (
+            test_label[2][i] + test_label[2 + 6][i] + test_label[2 + 6 * 2][i]) / 3
+        new_test_label[-3][i] = (test_label[-3][i] +
+                                 test_label[-3 - 6][i] + test_label[-3 - 6 * 2][i]) / 3
+        new_test_label[3][i] = (test_label[3][i] + test_label[3 + 6]
+                                [i] + test_label[3 + 6 * 2][i] + test_label[3 + 6 * 3][i]) / 4
+        new_test_label[-4][i] = (test_label[-4][i] + test_label[-4 - 6]
+                                 [i] + test_label[-4 - 6 * 2][i] + test_label[-4 - 6 * 3][i]) / 4
+        new_test_label[4][i] = (test_label[4][i] + test_label[4 + 6][i] + test_label[4 + 6 * 2]
+                                [i] + test_label[4 + 6 * 3][i] + test_label[4 + 6 * 4][i]) / 5
+        new_test_label[-5][i] = (test_label[-5][i] + test_label[-5 - 6][i] + test_label[-5 - 6 * 2]
+                                 [i] + test_label[-5 - 6 * 3][i] + test_label[-5 - 6 * 4][i]) / 5
+        new_test_label[5][i] = (test_label[5][i] + test_label[5 + 6][i] + test_label[5 + 6 * 2]
+                                [i] + test_label[5 + 6 * 3][i] + test_label[5 + 6 * 4][i] + test_label[5 + 6 * 5][i]) / 6
+        new_test_label[-6][i] = (test_label[-6][i] + test_label[-6 - 6][i] + test_label[-6 - 6 * 2]
+                                 [i] + test_label[-6 - 6 * 3][i] + test_label[-6 - 6 * 4][i] + test_label[-6 - 6 * 5][i]) / 6
+
+    # 后面（总数-(1+6)*6/2）日期
+    c = 6
+    for a in range(6, new_row * 7, 7):
+        for b in range(col):
+            new_test_label[c][b] = (test_label[a][b] + test_label[a + 6 * 1][b] + test_label[a + 6 * 2][b] +
+                                    test_label[a + 6 * 3][b] + test_label[a + 6 * 4][b] + test_label[a + 6 * 5][b] +
+                                    test_label[a + 6 * 6][b]) / 7
+        c = c + 1
+    return new_test_label
+
 
 x_axe, batch_loss, batch_rmse, batch_pred = [], [], [], []
 test_loss, test_rmse, test_mae, test_acc, test_r2, test_var, test_pred = [
@@ -298,6 +339,14 @@ for epoch in range(training_epoch):
     loss2, rmse2, test_output = sess.run([loss, error, y_pred],
                                          feed_dict={inputs: testX, labels: testY})
     test_label = np.reshape(testY, [-1, num_nodes])
+
+    # 修改test_label和test_output
+    new_test_label = update(test_label)
+    new_test_output = update(test_output)
+    test_label = new_test_label
+    test_output = new_test_output
+    # 修改结束
+
     rmse, mae, acc, r2_score, var_score = evaluation(test_label, test_output)
     test_label1 = test_label * max_value
     test_output1 = test_output * max_value

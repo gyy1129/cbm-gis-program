@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="container">
-      <h1 class="title">基于煤层气井时空特征产出序列研究系统</h1>
+      <h1 class="title">基于GIS和图神经网络的煤层气时空特征产出序列研究系统</h1>
       <p class="lead">专注于 煤层气数据管理 地图可视化 地理信息实用功能 以及 图神经网络~</p>
     </div>
   </div>
